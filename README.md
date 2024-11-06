@@ -1,14 +1,14 @@
 # solver-connect-gore
 Project 5
-Team Name: Connect Gore
-Team Members: Rudra Vashi, Aidan McLoughlin, Kevin Han, Owen Flynn
+* Team Name: Connect Gore
+* Team Members: Rudra Vashi, Aidan McLoughlin, Kevin Han, Owen Flynn
 
 
-\\\ Haskell
+```Haskell
 
 (Game board)Game  :: [[Color]]
           - list of lists (list of columns)
-          - list of rows
+          - 
           
 (Player) Color :: Enum
           - 2 different data types (red or yellow)
@@ -18,4 +18,4 @@ Move :: (Color, Int) / (Color, Column)
           
 Winner :: Color 
           - checking diagonal wins will be difficult
-\\\
+```
