@@ -16,9 +16,11 @@ Column :: [Color]
 (Player) Color :: Enum
           - 2 different data types (red or yellow)
           
-Move :: (Color, Int)
+Move :: Int
+          - int = column number
           - add new move to an end of a list
           
-Winner :: Color 
+Winner :: OneWinner Color | Tie | None
+          - 3 different types: winning player, tie, no winner
           - checking diagonal wins will be difficult
 ```
