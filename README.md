@@ -6,12 +6,8 @@ Project 5
 
 ```Haskell
 --implementation option 1
-Game  :: (Color,[Columns])
-          -- list of lists (list of columns)
 
-Column :: [Color]
-
-data Color = Red | Yellow
+data Color = Empty | Red | Yellow
           -- 2 different data types (red or yellow)
           
 Move :: Int
@@ -20,7 +16,12 @@ Move :: Int
           
 Winner :: OneWinner Color | Tie | None
           -- 3 different types: winning player, tie, no winner
-          
+
+Column :: [Color]
+
+Game  :: (Color,[Column])
+          -- list of lists (list of columns)
+
 -- implementation option 2
 
 Game :: [Column]
