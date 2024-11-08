@@ -7,7 +7,7 @@ Project 5
 ```Haskell
 --implementation option 1
 
-data Color = Empty | Red | Yellow
+data Color = Red | Yellow
           -- 2 different data types (red or yellow)
           
 Move :: Int
@@ -17,9 +17,9 @@ Move :: Int
 Winner :: OneWinner Color | Tie | None
           -- 3 different types: winning player, tie, no winner
 
-Column :: [Color]
+Board :: [[Maybe Color]]
 
-Game  :: (Color,[Column])
+Game  :: (Color,Board)
           -- list of lists (list of columns)
 
 -- implementation option 2
