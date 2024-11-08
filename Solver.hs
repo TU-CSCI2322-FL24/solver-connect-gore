@@ -71,10 +71,6 @@ checkSquareTwo brd =
                in if head (tail c3) == clr && head (tail (tail c2)) == clr && head (tail (tail (tail c1))) == clr then [clr]
                   else []
 
---checks bottom row of board for diagonals
---checkBottomDiag :: Board -> [Color]
---checkBottomDiag [] = []
---checkBottomDiag chunk = checkSquareOne chunk ++ (checkSquareTwo chunk) ++ (checkBottomDiag
 --checks board for diagonals in a bottom-up, left to right manner, returning list of winning colors
 checkDiagonal :: Board -> [Color]
 checkDiagonal brd = 
