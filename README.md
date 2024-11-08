@@ -5,22 +5,27 @@ Project 5
 
 
 ```Haskell
-
-(Game board)Game  :: (Color,[Columns])
-          - list of lists (list of columns)
-
-Winnerboard :: Column
+--implementation option 1
+Game  :: (Color,[Columns])
+          -- list of lists (list of columns)
 
 Column :: [Color]
 
-(Player) Color :: Enum
-          - 2 different data types (red or yellow)
+data Color = Red | Yellow
+          -- 2 different data types (red or yellow)
           
 Move :: Int
-          - int = column number
-          - add new move to an end of a list
+          -- int = column number
+          -- add new move to an end of a list
           
 Winner :: OneWinner Color | Tie | None
-          - 3 different types: winning player, tie, no winner
-          - checking diagonal wins will be difficult
+          -- 3 different types: winning player, tie, no winner
+          
+-- implementation option 2
+
+Game :: [Column]
+
+Move :: (Color, Int)
+-- the color of the piece being played and the number of the column it's being played in
+
 ```
