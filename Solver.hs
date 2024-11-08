@@ -1,6 +1,6 @@
 --implementation option 1
- Game  :: (Color,[Columns])
- Column :: [Color]
- data Color = Red | Yellow
- Move :: Int
- Winner :: OneWinner Color | Tie | None
+type Game  = (Color,Board)
+type Board = [[Color]]
+data Color = Red | Yellow
+type Move = Int
+data Winner = Won Color | Tie | Ongoing
