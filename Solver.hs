@@ -28,7 +28,7 @@ checkRow brd =
 
 --checks all rows for win, returning a list of winning colors
 checkHorizontal brd = 
-  if filter (\x -> length x > 0) brd == [] then []
+  if length (filter (\x -> length x > 0) brd) < 4 then []
   else (checkRow brd) ++ (checkHorizontal (map (\x -> if x == [] then [] else tail x) brd))
 
 --checks one column for a win, returning list of winning colors
