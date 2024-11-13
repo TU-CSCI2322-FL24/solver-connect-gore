@@ -47,12 +47,28 @@ showRows [] = []
 showRows (x:xs) = "| " : showRow x
 	let showRow [] = " |"
 		showRow (x:xs) = 
-			| x == Just Red  			= " R" : showRow xs
-			| x == Just Yellow  		= " Y" : showRow xs
-			| otherwise 				= " 0" : showRow xs
+			| x == Just Red  			= " o" : showRow xs
+			| x == Just Yellow  		= " x" : showRow xs
+			| otherwise 				= " ." : showRow xs
 			
 -- showRow :: [Maybe Color] -> [[Maybe Color]]
 -- showRow [] = []
+
+-- prettyPrint :: Board -> String
+-- prettyPrint board = unlines [ prettyRow r | r <- reverse [1..6]]
+-- 	where
+--     	prettyRow :: Row -> String
+--     	prettyRow r = unwords [ prettyCell r c | c <- [1..7]]
+    
+-- 		prettyCell :: Row -> Column -> String
+-- 		prettyCell r c = case lookup (Coordinate r c) grid of
+-- 			Just Red    -> "o"
+-- 			Just Yellow -> "x"
+-- 			Nothing     -> "."
+
+
+
+
 
 -- instance Show Color where
 -- 	show (Red) = (show x)++" f/s"
