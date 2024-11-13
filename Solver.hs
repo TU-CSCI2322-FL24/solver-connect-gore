@@ -9,10 +9,6 @@ data Winner = Won Color | Tie | Ongoing deriving (Show, Eq)
 -- for printing it makes more sense to have the horizontal rows than vertical columns
 -- built-in splitAt haskell function
 
--- instance Show Color where
--- 	show (Red) = (show x)++" f/s"
---  show (Yellow) = (show x)++" m/s"
-
 -- board is 7 lists of columns where each column is a list of maximum length 6
 -- board is 6 x 7 	(6 is column height and 7 is row length)
 maybeinator :: Board -> [[Maybe Color]]
@@ -33,10 +29,6 @@ rowtate :: [[Maybe Color]] -> [[Maybe Color]]
 rowtate = transpose 
 -- rotate mayboard = transpose mayboard
 
--- class Show a => Rhow a where
--- 	rhow :: a -> String
--- 	rhow x = show x
-
 showBoard :: [[Maybe Color]] -> String
 showBoard [] = []
 showBoard board = line ++ showRows board  ++ line 
@@ -51,9 +43,6 @@ showRows (x:xs) = "| " : showRow x
 			| x == Just Yellow  		= " x" : showRow xs
 			| otherwise 				= " ." : showRow xs
 			
--- showRow :: [Maybe Color] -> [[Maybe Color]]
--- showRow [] = []
-
 -- prettyPrint :: Board -> String
 -- prettyPrint board = unlines [ prettyRow r | r <- reverse [1..6]]
 -- 	where
@@ -66,16 +55,5 @@ showRows (x:xs) = "| " : showRow x
 -- 			Just Yellow -> "x"
 -- 			Nothing     -> "."
 
-
-
-
-
--- instance Show Color where
--- 	show (Red) = (show x)++" f/s"
---   	show (Yellow) = (show x)++" m/s"
-
--- class Show a => Phow a where
---   	phow :: a -> String
---   	phow x = show x
 
 
