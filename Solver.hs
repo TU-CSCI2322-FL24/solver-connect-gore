@@ -33,9 +33,9 @@ rowtate :: [[Maybe Color]] -> [[Maybe Color]]
 rowtate = transpose 
 -- rotate mayboard = transpose mayboard
 
-class Show a => Rhow a where
-	rhow :: a -> String
-	rhow x = show x
+-- class Show a => Rhow a where
+-- 	rhow :: a -> String
+-- 	rhow x = show x
 
 showBoard :: [[Maybe Color]] -> String
 showBoard [] = []
@@ -53,12 +53,6 @@ showRows (x:xs) = "| " : showRow x
 			
 -- showRow :: [Maybe Color] -> [[Maybe Color]]
 -- showRow [] = []
-
-
-
-
-
-
 
 -- instance Show Color where
 -- 	show (Red) = (show x)++" f/s"
