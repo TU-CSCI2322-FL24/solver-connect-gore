@@ -1,4 +1,6 @@
---implementation option 1
+-- implementation option 1
+import Data.List 
+
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq) 
@@ -14,46 +16,22 @@ data Winner = Won Color | Tie | Ongoing deriving (Show, Eq)
 maybeinator :: Board -> [[Maybe Color]]
 maybeinator [] = [] 
 maybeinator (x:xs) = 
-	-- aux [] num = []
-	let aux _ 6 = []
-		aux (y:ys) num = 
-			| y == Yellow	= Just Yellow : aux ys (num++)
-			| y == Red		= Just Red : aux ys (num++)
-			| otherwise		= Nothing : aux ys (num++)
-	in aux x 0 : maybeinator xs
--- bucket :: Eq b => (a -> b) -> [b] -> [a] -> [(b,[a])]
--- bucket bucketFn buckets items = 
---     [(b, filter (\x -> bucketFn x == b) items) | b <- buckets]
+ let aux _ 6 = []
+     aux [] num = Nothing : aux [] (num+1)
+     aux (y:ys) num  
+        | y == Yellow = Just Yellow : aux ys (num+1)
+        | otherwise   = Just Red : aux ys (num+1) -- | otherwise   = Nothing : aux ys (num+1)
+ in aux x 0 : maybeinator xs
 
-rowtate :: [[Maybe Color]] -> [[Maybe Color]]
-rowtate = transpose 
--- rotate mayboard = transpose mayboard
-
-showBoard :: [[Maybe Color]] -> String
-showBoard [] = []
-showBoard board = line ++ showRows board  ++ line 
-	where line = Show $ " - - - - - - - "
-			
-showRows :: [[Maybe Color]] -> [[Maybe Color]]
+showRows :: [[Maybe Color]] -> String
 showRows [] = []
-showRows (x:xs) = "| " : showRow x
-	let showRow [] = " |"
-		showRow (x:xs) = 
-			| x == Just Red  			= " o" : showRow xs
-			| x == Just Yellow  		= " x" : showRow xs
-			| otherwise 				= " ." : showRow xs
-			
--- prettyPrint :: Board -> String
--- prettyPrint board = unlines [ prettyRow r | r <- reverse [1..6]]
--- 	where
---     	prettyRow :: Row -> String
---     	prettyRow r = unwords [ prettyCell r c | c <- [1..7]]
-    
--- 		prettyCell :: Row -> Column -> String
--- 		prettyCell r c = case lookup (Coordinate r c) grid of
--- 			Just Red    -> "o"
--- 			Just Yellow -> "x"
--- 			Nothing     -> "."
-
-
-
+showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
+ where showRow [] = ""
+       showRow (y:ys)  
+            | y == Just Red     = " o" ++ showRow ys
+            | y == Just Yellow  = " x" ++ showRow ys
+            | otherwise         = " ." ++ showRow ys
+ 
+boardPrt :: Game -> String
+boardPrt (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
+    where rows = reverse . transpose $ maybeinator $ board
