@@ -5,7 +5,7 @@ type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
 type Move = Int
-data Winner = Won Color | Tie | Ongoing deriving (Show, Eq)
+data Winner = Won Color | Tie deriving (Show, Eq)
 
 --Story 3
 
@@ -39,14 +39,15 @@ validMoves :: Game -> [Move]
 validMoves (_,board) =reverse( position board 0 [])
 
 
-checkWinner :: Game -> Winner
-checkWinner (_,brd) = 
+checkWinner :: Game -> Maybe Winner
+checkWinner game@(_,brd) = 
   let winnerLst = checkVertical brd ++ (checkHorizontal brd) ++ (checkDiagonal brd)
-  in if winnerLst == [] then Ongoing
+  in if winnerLst == [] then if validMoves game == [] then Just Tie
+                             else Nothing
      else if Red `elem` winnerLst
-          then if Yellow `elem` winnerLst then Tie
-               else Won Red
-          else Won Yellow
+          then if Yellow `elem` winnerLst then Just Tie
+               else Just(Won Red)
+          else Just (Won Yellow)
 
 --checks the bottom row of a board for a win, returning a list of winning colors
 checkRow brd =
