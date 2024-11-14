@@ -1,4 +1,6 @@
---implementation option 1
+-- implementation option 1
+import Data.List 
+
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
@@ -110,5 +112,33 @@ checkDiagonal brd =
   else let aux [] = []
            aux chunk = checkSquareOne chunk ++ (checkSquareTwo chunk) ++ (aux (tail chunk))
        in (aux brd) ++ (checkDiagonal (map (\x -> if x == [] then [] else tail x) brd))
+
+
+-- Story 5 
+
+-- takes a board and turns it into Maybe Colors, if a column isn't filled to its maximum length, 
+maybeinator :: Board -> [[Maybe Color]]
+maybeinator [] = [] 
+maybeinator (x:xs) = 
+ let aux _ 6 = []
+     aux [] num = Nothing : aux [] (num+1)
+     aux (y:ys) num  
+        | y == Yellow = Just Yellow : aux ys (num+1)
+        | otherwise   = Just Red : aux ys (num+1) 
+ in aux x 0 : maybeinator xs
+
+showRows :: [[Maybe Color]] -> String
+showRows [] = []
+showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
+ where showRow [] = ""
+       showRow (y:ys)  
+            | y == Just Red     = " o" ++ showRow ys
+            | y == Just Yellow  = " x" ++ showRow ys
+            | otherwise         = " ." ++ showRow ys
+--
+boardPrt :: Game -> String
+boardPrt (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
+    where rows = reverse . transpose $ maybeinator $ board
+
 
 
