@@ -117,6 +117,7 @@ checkDiagonal brd =
 -- Story 5 
 
 -- takes a board and turns it into Maybe Colors, if a column isn't filled to its maximum length, 
+-- then Nothings are used to fill it up
 maybeinator :: Board -> [[Maybe Color]]
 maybeinator [] = [] 
 maybeinator (x:xs) = 
@@ -127,6 +128,8 @@ maybeinator (x:xs) =
         | otherwise   = Just Red : aux ys (num+1) 
  in aux x 0 : maybeinator xs
 
+
+-- converts the board into a String 
 showRows :: [[Maybe Color]] -> String
 showRows [] = []
 showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
@@ -135,9 +138,12 @@ showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
             | y == Just Red     = " o" ++ showRow ys
             | y == Just Yellow  = " x" ++ showRow ys
             | otherwise         = " ." ++ showRow ys
---
-boardPrt :: Game -> String
-boardPrt (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
+
+
+-- combines the code of maybeinator and showRows to print out the current state of the board and whose turn it is
+gamePrint :: Game -> String
+gamePrint (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
+    -- transpose turns the board from a list of columns to a list of rows, its a handy imported function
     where rows = reverse . transpose $ maybeinator $ board
 
 
