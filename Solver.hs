@@ -1,6 +1,6 @@
 -- implementation option 1
 import Data.List 
-
+import Data.Maybe
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
@@ -165,6 +165,24 @@ gamePrint (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRo
 -- End of Story 5
 -- 
 
+
+whoWillWin :: Game -> (Winner, Winner)
+whoWillWin game@(color,_) =  
+    case checkWinner game of
+       Just w -> w 
+       Nothing -> 
+            let nextGames = map (makeMove game) (validMoves game) 
+                options = map helperWhoWins nextGames
+            in case color of
+               Red -> if (Win Red) `elem` options then (Won Red) else if Tie `elem` options then Tie else (Yellow Won)
+               Yellow-> if (Win Yellow) `elem` options then (Won Yellow) else if Tie `elem` options then Tie else (Red Won)
+               
+                
+                
+ 
+                                  
+                                  
+
 -- 
 -- Story 7 has already been done, since Connect 4 is already has bounded depth.
--- 
+--
