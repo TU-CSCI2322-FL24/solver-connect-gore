@@ -7,6 +7,17 @@ data Color = Red | Yellow deriving (Show, Eq)
 type Move = Int
 data Winner = Won Color | Tie deriving (Show, Eq)
 
+r :: Color
+r = Red
+
+e :: Color
+e = Yellow
+
+tieBoard :: Board
+tieBoard = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r,e],[e,r,e,e,e,r],[e,r,e,e,r,e],[r,r,r,e,r,e],[e,e,e,r,e,r]]
+
+incomplete1 = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r],[e,r,e,e,e],[e,r,e,e,r,e],[r,r,r,e,r,e],[e,e,e,r,e,r]]
+incomplete2 = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r,e],[e,r,e,e,e,r],[e,r,e,e,r,e],[r,r,r,e],[e,e,e,r]]
 -- 
 -- Story 3
 -- 
