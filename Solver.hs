@@ -1,6 +1,6 @@
 -- implementation option 1
 import Data.List 
-
+import Data.Maybe
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
@@ -147,5 +147,19 @@ gamePrint (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRo
     -- transpose turns the board from a list of columns to a list of rows, its a handy imported function
     where rows = reverse . transpose $ maybeinator $ board
 
-
-
+helperWhoWins :: Game -> (Winner, Winner)
+helperWhoWins game=  
+    let w = checkWinner game
+    in if w /= Nothing
+       then (fromMaybe Tie w, fromMaybe Tie w)
+       else let nextGames = map (makeMove game) (validMoves game) 
+                options = map helperWhoWins nextGames
+                redOptions = [x| (x,y) <- options]
+                yellowOptions = [y | (x,y) <- options]
+                redReturn = if (Won Red) `elem` redOptions then Won Red else Tie
+                yellowReturn = if (Won Yellow) `elem` yellowOptions then Won Yellow else Tie  
+            in (redReturn, yellowReturn) 
+whoWillWin ::Game -> Winner 
+whoWillWin game@(color,board) = let (x,y) =  helperWhoWins game 
+                                  in if color ==  Red then x
+                                     else y
