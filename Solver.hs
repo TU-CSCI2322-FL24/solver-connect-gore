@@ -149,17 +149,17 @@ gamePrint (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRo
 
 helperWhoWins :: Game -> (Winner, Winner)
 helperWhoWins game=  
-    let w = checkWinner game
-    in if w /= Nothing
-       then (fromMaybe Tie w, fromMaybe Tie w)
-       else let nextGames = map (makeMove game) (validMoves game) 
+    case checkWinner game of
+       Just w -> w 
+       Nothing -> 
+            let nextGames = map (makeMove game) (validMoves game) 
                 options = map helperWhoWins nextGames
                 redOptions = [x| (x,y) <- options]
                 yellowOptions = [y | (x,y) <- options]
                 redReturn = if (Won Red) `elem` redOptions then Won Red else Tie
                 yellowReturn = if (Won Yellow) `elem` yellowOptions then Won Yellow else Tie  
             in (redReturn, yellowReturn) 
-whoWillWin ::Game -> Winner 
+whoWillWin :: Game -> Winner 
 whoWillWin game@(color,board) = let (x,y) =  helperWhoWins game 
                                   in if color ==  Red then x
                                      else y
