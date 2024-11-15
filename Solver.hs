@@ -147,19 +147,19 @@ gamePrint (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRo
     -- transpose turns the board from a list of columns to a list of rows, its a handy imported function
     where rows = reverse . transpose $ maybeinator $ board
 
-helperWhoWins :: Game -> (Winner, Winner)
-helperWhoWins game=  
+whoWillWin :: Game -> (Winner, Winner)
+whoWillWin game@(color,_) =  
     case checkWinner game of
        Just w -> w 
        Nothing -> 
             let nextGames = map (makeMove game) (validMoves game) 
                 options = map helperWhoWins nextGames
-                redOptions = [x| (x,y) <- options]
-                yellowOptions = [y | (x,y) <- options]
-                redReturn = if (Won Red) `elem` redOptions then Won Red else Tie
-                yellowReturn = if (Won Yellow) `elem` yellowOptions then Won Yellow else Tie  
-            in (redReturn, yellowReturn) 
-whoWillWin :: Game -> Winner 
-whoWillWin game@(color,board) = let (x,y) =  helperWhoWins game 
-                                  in if color ==  Red then x
-                                     else y
+            in case color of
+               Red -> if (Win Red) `elem` options then (Won Red) else if Tie `elem` options then Tie else (Yellow Won)
+               Yellow-> if (Win Yellow) `elem` options then (Won Yellow) else if Tie `elem` options then Tie else (Red Won)
+               
+                
+                
+ 
+                                  
+                                  
