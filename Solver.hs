@@ -166,16 +166,16 @@ gamePrint (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRo
 -- 
 
 
-whoWillWin :: Game -> (Winner, Winner)
+whoWillWin :: Game -> Winner
 whoWillWin game@(color,_) =  
     case checkWinner game of
        Just w -> w 
        Nothing -> 
             let nextGames = map (makeMove game) (validMoves game) 
-                options = map helperWhoWins nextGames
+                options = map whoWillWin nextGames
             in case color of
-               Red -> if (Win Red) `elem` options then (Won Red) else if Tie `elem` options then Tie else (Yellow Won)
-               Yellow-> if (Win Yellow) `elem` options then (Won Yellow) else if Tie `elem` options then Tie else (Red Won)
+               Red -> if (Won Red) `elem` options then (Won Red) else if Tie `elem` options then Tie else (Won Yellow)
+               Yellow-> if (Won Yellow) `elem` options then (Won Yellow) else if Tie `elem` options then Tie else (Won Red)
                
                 
                 
