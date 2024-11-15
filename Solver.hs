@@ -215,7 +215,12 @@ whoWillWin game@(color,_) =
 -- 
 -- Story 11
 --                       
-                                  
+
+
+-- 
+-- End of Story 11
+--  
+
 -- 
 -- Story 12
 --
