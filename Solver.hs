@@ -195,7 +195,7 @@ whoWillWin game@(color,_) =
 -- 
 -- Story 11
 --                       
-                                  
+                            
 -- 
 -- Story 12
 --
@@ -216,4 +216,20 @@ showColor Yellow = 'x'
 -- 
 -- End of Story 13
 --  
+
+-- 
+-- Story 14
+--               
+ 
+-- 
+-- Story 15
+--                       
+                                  
+-- 
+-- Story 16
+--
+    
+
+
+
 
