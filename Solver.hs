@@ -18,6 +18,7 @@ tieBoard = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r,e],[e,r,e,e,e,r],[e,r,e,e,r,e
 
 incomplete1 = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r],[e,r,e,e,e],[e,r,e,e,r,e],[r,r,r,e,r,e],[e,e,e,r,e,r]]
 incomplete2 = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r,e],[e,r,e,e,e,r],[e,r,e,e,r,e],[r,r,r,e],[e,e,e,r]]
+
 -- 
 -- Story 3
 -- 
@@ -39,27 +40,41 @@ dropPiece color column = reverse (color : reverse column)
 nextColor :: Color -> Color
 nextColor Red = Yellow
 nextColor Yellow = Red
+-- 
+-- End of Story 3
+-- 
 
-
+-- 
+-- Story 4
+-- 
 position :: Board -> Int -> [Move] -> [Move]
 position [] index acc = acc
 position (x:xs) index acc  
-    |length x == 6 = position xs (index +1) acc
-    |otherwise     = position xs (index +1) (index:acc)
+    | length x == 6 = position xs (index +1) acc
+    | otherwise     = position xs (index +1) (index:acc)
     
 
 validMoves :: Game -> [Move]
-validMoves (_,board) = reverse( position board 0 [])
+validMoves (_,board) = reverse ( position board 0 [])
+-- 
+-- End of Story 4
+-- 
 
 
+-- 
+-- Story 2
+-- 
 checkWinner :: Game -> Maybe Winner
 checkWinner game@(_,brd) = 
   let winnerLst = checkVertical brd ++ (checkHorizontal brd) ++ (checkDiagonal brd)
-  in if winnerLst == [] then if validMoves game == [] then Just Tie
-                             else Nothing
+  in if winnerLst == [] 
+    then if validMoves game == [] 
+          then Just Tie
+          else Nothing
      else if Red `elem` winnerLst
-          then if Yellow `elem` winnerLst then Just Tie
-               else Just(Won Red)
+          then if Yellow `elem` winnerLst 
+                then Just Tie
+                else Just(Won Red)
           else Just (Won Yellow)
 
 -- checks the bottom row of a board for a win, returning a list of winning colors
@@ -126,12 +141,15 @@ checkDiagonal brd =
   else let aux [] = []
            aux chunk = checkSquareOne chunk ++ (checkSquareTwo chunk) ++ (aux (tail chunk))
        in (aux brd) ++ (checkDiagonal (map (\x -> if x == [] then [] else tail x) brd))
+-- 
+-- End of Story 2
+-- 
 
 -- 
 -- Story 5 
 -- 
 
--- Takes a board and turns it into Maybe Colors. 
+-- Takes a board of Colors and turns it into a board of Maybe Colors. 
 -- If a column isn't filled to its maximum length, then the rest of the column is filled up with Nothings.
 maybeinator :: Board -> [[Maybe Color]]
 maybeinator [] = [] 
@@ -157,15 +175,25 @@ showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
 
 
 -- Combines the code of maybeinator and showRows to print out the current state of the board and whose turn it is.
-gamePrint :: Game -> String
-gamePrint (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
+prettyPrint :: Game -> String
+prettyPrint (curr,brd) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
     -- The transpose function turns the board from a list of columns to a list of rows, its a handy imported function.
-    where rows = reverse . transpose $ maybeinator $ board
+    where rows = reverse $ transpose $ maybeinator $ brd
 -- 
 -- End of Story 5
 -- 
 
+-- 
+-- Story 7 has already been done, since Connect 4 is already has bounded depth.
+-- 
 
+-- 
+-- Story 8 has already been finished.
+-- 
+
+-- 
+-- Story 9 
+-- 
 whoWillWin :: Game -> Winner
 whoWillWin game@(color,_) =  
     case checkWinner game of
@@ -176,13 +204,38 @@ whoWillWin game@(color,_) =
             in case color of
                Red -> if (Won Red) `elem` options then (Won Red) else if Tie `elem` options then Tie else (Won Yellow)
                Yellow-> if (Won Yellow) `elem` options then (Won Yellow) else if Tie `elem` options then Tie else (Won Red)
-               
+-- 
+-- End of Story 9
+--           
                 
-                
+-- 
+-- Story 10
+--               
  
+-- 
+-- Story 11
+--                       
                                   
-                                  
+-- 
+-- Story 12
+--
+                              
+-- 
+-- Story 13
+--
 
 -- 
--- Story 7 has already been done, since Connect 4 is already has bounded depth.
+-- Story 14
 --
+
+-- 
+-- Story 15
+--
+
+-- 
+-- Story 16
+--
+
+
+
+
