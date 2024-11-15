@@ -143,7 +143,6 @@ maybeinator (x:xs) =
         | otherwise   = Just Red : aux ys (num+1) 
  in aux x 0 : maybeinator xs
 
-
 -- Converts the board into a single String. 
 -- Without a proper IO function, the board is printed as a single string on a single line. 
 showRows :: [[Maybe Color]] -> String
@@ -155,17 +154,26 @@ showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
             | y == Just Yellow  = " x" ++ showRow ys
             | otherwise         = " ." ++ showRow ys
 
-
 -- Combines the code of maybeinator and showRows to print out the current state of the board and whose turn it is.
-gamePrint :: Game -> String
-gamePrint (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
+prettyPrint :: Game -> String
+prettyPrint (curr,brd) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
     -- The transpose function turns the board from a list of columns to a list of rows, its a handy imported function.
-    where rows = reverse . transpose $ maybeinator $ board
+    where rows = reverse $ transpose $ maybeinator $ brd
 -- 
 -- End of Story 5
 -- 
 
+-- 
+-- Story 7 has already been done, since Connect 4 is already has bounded depth.
+-- 
 
+-- 
+-- Story 8 has already been finished.
+-- 
+
+-- 
+-- Story 9 
+-- 
 whoWillWin :: Game -> Winner
 whoWillWin game@(color,_) =  
     case checkWinner game of
@@ -176,13 +184,36 @@ whoWillWin game@(color,_) =
             in case color of
                Red -> if (Won Red) `elem` options then (Won Red) else if Tie `elem` options then Tie else (Won Yellow)
                Yellow-> if (Won Yellow) `elem` options then (Won Yellow) else if Tie `elem` options then Tie else (Won Red)
-               
+-- 
+-- End of Story 9
+--           
                 
-                
+-- 
+-- Story 10
+--               
  
+-- 
+-- Story 11
+--                       
                                   
-                                  
+-- 
+-- Story 12
+--
+                              
+-- 
+-- Story 13
+--
+showGame :: Game -> String
+showGame (curr,board) = unlines $ [showColor curr]:[ showRow row | row <- board]
+  where showRow :: [Color] -> String
+	      showRow row =  [ showColor color | color <- row]
+         
+showColor :: Color -> Char
+showColor Red = 'o'
+showColor Yellow = 'x'
+
 
 -- 
--- Story 7 has already been done, since Connect 4 is already has bounded depth.
---
+-- End of Story 13
+--  
+
