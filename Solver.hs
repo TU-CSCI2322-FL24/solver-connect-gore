@@ -213,7 +213,24 @@ whoWillWin game@(color,_) =
 -- 
 -- Story 10
 --               
- 
+bestMove :: Game -> Maybe Move
+bestMove game@(color,_) = 
+    let moves = validMoves game
+        moveResultPairs = map (\x -> (x,whoWillWin (makeMove game x))) moves
+        winningMove = keyByVal (Won color) moveResultPairs
+    in case winningMove of
+       Just x  -> Just x
+       Nothing -> 
+         let tyingMove = keyByVal Tie moveResultPairs
+         in case tyingMove of
+            Just x -> Just x
+            Nothing -> keyByVal (Won (nextColor color)) moveResultPairs
+          
+keyByVal x [] = Nothing
+keyByVal x ((key,val):pairs) =
+  if val == x
+  then Just key
+  else keyByVal x pairs
 -- 
 -- Story 11
 --                       
