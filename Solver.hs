@@ -201,9 +201,11 @@ whoWillWin game@(color,_) =
        Nothing -> 
             let nextGames = map (makeMove game) (validMoves game) 
                 options = map whoWillWin nextGames
-            in case color of
-               Red -> if (Won Red) `elem` options then (Won Red) else if Tie `elem` options then Tie else (Won Yellow)
-               Yellow-> if (Won Yellow) `elem` options then (Won Yellow) else if Tie `elem` options then Tie else (Won Red)
+            in if (Won color) `elem` options 
+               then (Won color) 
+               else if Tie `elem` options 
+                    then Tie 
+                    else (Won (nextColor color))
 -- 
 -- End of Story 9
 --           
