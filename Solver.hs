@@ -1,27 +1,13 @@
 -- implementation option 1
 import Data.List 
-import Data.Maybe
+
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
 type Move = Int
 data Winner = Won Color | Tie deriving (Show, Eq)
 
-r :: Color
-r = Red
-
-e :: Color
-e = Yellow
-
-tieBoard :: Board
-tieBoard = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r,e],[e,r,e,e,e,r],[e,r,e,e,r,e],[r,r,r,e,r,e],[e,e,e,r,e,r]]
-
-incomplete1 = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r],[e,r,e,e,e],[e,r,e,e,r,e],[r,r,r,e,r,e],[e,e,e,r,e,r]]
-incomplete2 = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r,e],[e,r,e,e,e,r],[e,r,e,e,r,e],[r,r,r,e],[e,e,e,r]]
-
--- 
--- Story 3
--- 
+--Story 3
 
 -- Simple function to make a move by dropping a piece into the specified column
 makeMove :: Game -> Move -> Game
@@ -34,50 +20,36 @@ makeMove (currentColor, board) move =
 
 -- Drops a piece into the first available position in a column
 dropPiece :: Color -> [Color] -> [Color]
-dropPiece color column = reverse (color : reverse column)
+dropPiece color column = column ++ color
 
 -- Function to switch to the next player's color. I made it since we need to deicide who's next.
 nextColor :: Color -> Color
 nextColor Red = Yellow
 nextColor Yellow = Red
--- 
--- End of Story 3
--- 
 
--- 
--- Story 4
--- 
-position :: Board -> Int -> [Move] -> [Move]
+
+position :: Board -> Int ->[Move] -> [Move]
 position [] index acc = acc
 position (x:xs) index acc  
-    | length x == 6 = position xs (index +1) acc
-    | otherwise     = position xs (index +1) (index:acc)
+    |length x == 6 =  position xs (index+1) acc
+    |otherwise     = position xs (index +1) (index:acc)
     
 
 validMoves :: Game -> [Move]
-validMoves (_,board) = reverse ( position board 0 [])
--- 
--- End of Story 4
--- 
+validMoves (_,board) =reverse( position board 0 [])
 
 
--- 
--- Story 2
--- 
 checkWinner :: Game -> Maybe Winner
 checkWinner game@(_,brd) = 
   let winnerLst = checkVertical brd ++ (checkHorizontal brd) ++ (checkDiagonal brd)
-  in if winnerLst == [] 
-    then if validMoves game == [] 
-          then Just Tie
-          else Nothing
+  in if winnerLst == [] then if validMoves game == [] then Just Tie
+                             else Nothing
      else if Red `elem` winnerLst
-          then if Yellow `elem` winnerLst 
-                then Just Tie
-                else Just(Won Red)
+          then if Yellow `elem` winnerLst then Just Tie
+               else Just(Won Red)
           else Just (Won Yellow)
 
--- checks the bottom row of a board for a win, returning a list of winning colors
+--checks the bottom row of a board for a win, returning a list of winning colors
 checkRow brd =
   let aux 4 clr xs = [clr]
       aux 0 _ (x:xs) = if x == [] then aux 0 Red xs
@@ -89,12 +61,12 @@ checkRow brd =
              else aux 1 (head x) xs
   in if head brd == [] then aux 0 Red (tail brd) else aux 1 (head (head brd)) (tail brd)
 
--- checks all rows for win, returning a list of winning colors
+--checks all rows for win, returning a list of winning colors
 checkHorizontal brd = 
   if length (filter (\x -> length x > 0) brd) < 4 then []
   else (checkRow brd) ++ (checkHorizontal (map (\x -> if x == [] then [] else tail x) brd))
 
--- checks one column for a win, returning list of winning colors
+--checks one column for a win, returning list of winning colors
 checkColumn col =
   let aux 4 clr _ = [clr]
       aux _ _ [] = []
@@ -104,11 +76,11 @@ checkColumn col =
   in if col == [] then []
      else aux 1 (head col) (tail col)
 
--- checks all columns for a win, returning a list of winning colors
+--checks all columns for a win, returning a list of winning colors
 checkVertical brd = concat (map checkColumn brd)
 
 
--- checks if the bottom left 4x4 has a diagonal win this way /, returning list of winning colors
+--checks if the bottom left 4x4 has a diagonal win this way /, returning list of winning colors
 checkSquareOne :: Board -> [Color]
 checkSquareOne brd =
   if length brd < 4 then []
@@ -121,7 +93,7 @@ checkSquareOne brd =
                in if head (tail c2) == clr && head (tail (tail c3)) == clr && head (tail (tail (tail c4))) == clr then [clr]
                   else []
 
--- same as above but for diagonal this way \
+--same as above but for diagonal this way \
 checkSquareTwo :: Board -> [Color]
 checkSquareTwo brd =
   if length brd < 4 then []
@@ -134,23 +106,19 @@ checkSquareTwo brd =
                in if head (tail c3) == clr && head (tail (tail c2)) == clr && head (tail (tail (tail c1))) == clr then [clr]
                   else []
 
--- checks board for diagonals in a bottom-up, left to right manner, returning list of winning colors
+--checks board for diagonals in a bottom-up, left to right manner, returning list of winning colors
 checkDiagonal :: Board -> [Color]
 checkDiagonal brd = 
   if filter (\x -> length x > 0) brd == [] then []
   else let aux [] = []
            aux chunk = checkSquareOne chunk ++ (checkSquareTwo chunk) ++ (aux (tail chunk))
        in (aux brd) ++ (checkDiagonal (map (\x -> if x == [] then [] else tail x) brd))
--- 
--- End of Story 2
--- 
 
--- 
+
 -- Story 5 
--- 
 
--- Takes a board of Colors and turns it into a board of Maybe Colors. 
--- If a column isn't filled to its maximum length, then the rest of the column is filled up with Nothings.
+-- takes a board and turns it into Maybe Colors, if a column isn't filled to its maximum length, 
+-- then Nothings are used to fill it up
 maybeinator :: Board -> [[Maybe Color]]
 maybeinator [] = [] 
 maybeinator (x:xs) = 
@@ -162,8 +130,7 @@ maybeinator (x:xs) =
  in aux x 0 : maybeinator xs
 
 
--- Converts the board into a single String. 
--- Without a proper IO function, the board is printed as a single string on a single line. 
+-- converts the board into a String 
 showRows :: [[Maybe Color]] -> String
 showRows [] = []
 showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
@@ -174,87 +141,11 @@ showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
             | otherwise         = " ." ++ showRow ys
 
 
--- Combines the code of maybeinator and showRows to print out the current state of the board and whose turn it is.
-prettyPrint :: Game -> String
-prettyPrint (curr,brd) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
-    -- The transpose function turns the board from a list of columns to a list of rows, its a handy imported function.
-    where rows = reverse $ transpose $ maybeinator $ brd
--- 
--- End of Story 5
--- 
-
--- 
--- Story 7 has already been done, since Connect 4 is already has bounded depth.
--- 
-
--- 
--- Story 8 has already been finished.
--- 
-
--- 
--- Story 9 
--- 
-whoWillWin :: Game -> Winner
-whoWillWin game@(color,_) =  
-    case checkWinner game of
-       Just w -> w 
-       Nothing -> 
-            let nextGames = map (makeMove game) (validMoves game) 
-                options = map whoWillWin nextGames
-            in if (Won color) `elem` options 
-               then (Won color) 
-               else if Tie `elem` options 
-                    then Tie 
-                    else (Won (nextColor color))
--- 
--- End of Story 9
---           
-                
--- 
--- Story 10
---               
-bestMove :: Game -> Maybe Move
-bestMove game@(color,_) = 
-    let moves = validMoves game
-        moveResultPairs = map (\x -> (x,whoWillWin (makeMove game x))) moves
-        winningMove = keyByVal (Won color) moveResultPairs
-    in case winningMove of
-       Just x  -> Just x
-       Nothing -> 
-         let tyingMove = keyByVal Tie moveResultPairs
-         in case tyingMove of
-            Just x -> Just x
-            Nothing -> keyByVal (Won (nextColor color)) moveResultPairs
-          
-keyByVal x [] = Nothing
-keyByVal x ((key,val):pairs) =
-  if val == x
-  then Just key
-  else keyByVal x pairs
--- 
--- Story 11
---                       
-                                  
--- 
--- Story 12
---
-                              
--- 
--- Story 13
---
-
--- 
--- Story 14
---
-
--- 
--- Story 15
---
-
--- 
--- Story 16
---
-
+-- combines the code of maybeinator and showRows to print out the current state of the board and whose turn it is
+gamePrint :: Game -> String
+gamePrint (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
+    -- transpose turns the board from a list of columns to a list of rows, its a handy imported function
+    where rows = reverse . transpose $ maybeinator $ board
 
 
 
