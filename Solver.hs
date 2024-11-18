@@ -232,6 +232,10 @@ keyByVal x ((key,val):pairs) =
   then Just key
   else keyByVal x pairs
 -- 
+-- End of Story 10
+--           
+
+-- 
 -- Story 11
 --                       
                                   
