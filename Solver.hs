@@ -214,11 +214,15 @@ whoWillWin game@(color,_) =
  
 -- 
 -- Story 11
---                       
+--
+
+-- Turns a game state into a string in order to load a game into a file.
+-- The resulting text format: "Red\nxox\nox\nxoxx\nxxxo\nooxxo\noxxoo\nx"
 writeGame :: Game -> String
 writeGame (player,columns) = show player ++ "\n" ++ writeColumns columns
   where writeColumns columns = unlines $ [ writeColumn col | col <- columns]
 
+-- Helper function for writeGame. Turns a column into a string
 writeColumn :: [Color] -> String
 writeColumn [] = "" 
 writeColumn (x:xs) 
