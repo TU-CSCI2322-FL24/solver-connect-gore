@@ -216,8 +216,8 @@ whoWillWin game@(color,_) =
 -- Story 11
 --                       
 writeGame :: Game -> String
-writeGame game@(player,columns) = show curr ++ "\n" ++ writeColumns columns
-  where stringColumns columns = unlines $ [ writeColumn col | col <- columns]
+writeGame (player,columns) = show player ++ "\n" ++ writeColumns columns
+  where writeColumns columns = unlines $ [ writeColumn col | col <- columns]
 
 writeColumn :: [Color] -> String
 writeColumn [] = "" 
