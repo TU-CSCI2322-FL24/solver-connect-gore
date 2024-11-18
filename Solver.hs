@@ -215,7 +215,15 @@ whoWillWin game@(color,_) =
 -- 
 -- Story 11
 --                       
+writeGame :: Game -> String
+writeGame game@(player,columns) = show curr ++ "\n" ++ writeColumns columns
+  where stringColumns columns = unlines $ [ writeColumn col | col <- columns]
 
+writeColumn :: [Color] -> String
+writeColumn [] = "" 
+writeColumn (x:xs) 
+  | x == Red  = "o" ++ writeColumn xs
+  | otherwise = "x" ++ writeColumn xs
 
 -- 
 -- End of Story 11
