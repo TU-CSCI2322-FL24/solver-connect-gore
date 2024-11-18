@@ -203,15 +203,18 @@ whoWillWin game@(color,_) =
 -- 
 -- Story 13
 --
+
+-- Turns a game state into a string in order to load a game into a file.
+-- The resulting text format: "o\nxox\nox\nxoxx\nxxxo\nooxxo\noxxoo\nx\n"
+-- The first character is the current player, while eveything else belongs to a column.
 showGame :: Game -> String
-showGame (curr,board) = unlines $ [showColor curr]:[ showRow row | row <- board]
-  where showRow :: [Color] -> String
-	      showRow row =  [ showColor color | color <- row]
-         
+showGame (player,board) = unlines $ [showColor player]:[showColumn col | col <- board]
+  where showColumn col = [showColor color | color <- col]
+
+-- Helper function for showGame. Turns a color into a character
 showColor :: Color -> Char
 showColor Red = 'o'
 showColor Yellow = 'x'
-
 
 -- 
 -- End of Story 13
