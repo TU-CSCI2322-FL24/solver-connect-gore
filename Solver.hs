@@ -20,7 +20,7 @@ makeMove (currentColor, board) move =
 
 -- Drops a piece into the first available position in a column
 dropPiece :: Color -> [Color] -> [Color]
-dropPiece color column = column ++ color
+dropPiece color column = column ++ [color]
 
 -- Function to switch to the next player's color. I made it since we need to deicide who's next.
 nextColor :: Color -> Color
