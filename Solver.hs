@@ -141,11 +141,91 @@ showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
             | otherwise         = " ." ++ showRow ys
 
 
--- combines the code of maybeinator and showRows to print out the current state of the board and whose turn it is
-gamePrint :: Game -> String
-gamePrint (curr,board) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
-    -- transpose turns the board from a list of columns to a list of rows, its a handy imported function
-    where rows = reverse . transpose $ maybeinator $ board
+-- Combines the code of maybeinator and showRows to print out the current state of the board and whose turn it is.
+prettyPrint :: Game -> String
+prettyPrint (curr,brd) = "Current players turn: " ++ show curr ++ "\n" ++ showRows rows
+    -- The transpose function turns the board from a list of columns to a list of rows, its a handy imported function.
+    where rows = reverse $ transpose $ maybeinator $ brd
+-- 
+-- End of Story 5
+-- 
+
+-- 
+-- Story 7 has already been done, since Connect 4 is already has bounded depth.
+-- 
+
+-- 
+-- Story 8 has already been finished.
+-- 
+
+-- 
+-- Story 9 
+-- 
+whoWillWin :: Game -> Winner
+whoWillWin game@(color,_) =  
+    case checkWinner game of
+       Just w -> w 
+       Nothing -> 
+            let nextGames = map (makeMove game) (validMoves game) 
+                options = map whoWillWin nextGames
+            in if (Won color) `elem` options 
+               then (Won color) 
+               else if Tie `elem` options 
+                    then Tie 
+                    else (Won (nextColor color))
+-- 
+-- End of Story 9
+--           
+                
+-- 
+-- Story 10
+--               
+bestMove :: Game -> Maybe Move
+bestMove game@(color,_) = 
+    let moves = validMoves game
+        moveResultPairs = map (\x -> (x,whoWillWin (makeMove game x))) moves
+        winningMove = keyByVal (Won color) moveResultPairs
+    in case winningMove of
+       Just x  -> Just x
+       Nothing -> 
+         let tyingMove = keyByVal Tie moveResultPairs
+         in case tyingMove of
+            Just x -> Just x
+            Nothing -> keyByVal (Won (nextColor color)) moveResultPairs
+          
+keyByVal x [] = Nothing
+keyByVal x ((key,val):pairs) =
+  if val == x
+  then Just key
+  else keyByVal x pairs
+-- 
+-- End of Story 10
+--           
+
+-- 
+-- Story 11
+--                       
+                                  
+-- 
+-- Story 12
+--
+                              
+-- 
+-- Story 13
+--
+
+-- 
+-- Story 14
+--
+
+-- 
+-- Story 15
+--
+
+-- 
+-- Story 16
+--
+
 
 
 
