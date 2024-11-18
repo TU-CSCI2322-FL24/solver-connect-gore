@@ -13,10 +13,12 @@ data Winner = Won Color | Tie deriving (Show, Eq)
 makeMove :: Game -> Move -> Game
 makeMove (currentColor, board) move =
   -- It's the step we split the array to insert the color for the move.
-  let (leftCols, (column:rightCols)) = splitAt move board 
-      -- I wrote the dropPiece which helps to insert the Color into the column
-      updatedColumn = dropPiece currentColor column
-  in (nextColor currentColor, leftCols ++ (updatedColumn : rightCols)) -- Return new col
+  case splitAt move board of
+    (leftCols, (column:rightCols)) -> let updatedColumn = dropPiece currentColor column
+      in (nextColor currentColor, leftCols ++ (updatedColumn : rightCols)) -- Return new col
+    _ -> error "invalid move"
+    
+
 
 -- Drops a piece into the first available position in a column
 dropPiece :: Color -> [Color] -> [Color]
