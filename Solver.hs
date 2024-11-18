@@ -224,7 +224,6 @@ writeColumn [] = ""
 writeColumn (x:xs) 
   | x == Red  = "o" ++ writeColumn xs
   | otherwise = "x" ++ writeColumn xs
-
 -- 
 -- End of Story 11
 --  
