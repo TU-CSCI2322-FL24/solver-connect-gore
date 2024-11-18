@@ -225,7 +225,47 @@ writeColumn (x:xs)
 -- 
 -- Story 12
 --
-                              
+readGame :: String -> Maybe Game       
+readGame file =
+  case length strs of
+  8 -> 
+    let colorStr = head strs
+        boardStrs = tail strs
+        color = colorFromStr colorStr
+        boardMaybeColors = map (map colorFromChar) boardStrs
+        boardMaybeColumns = map catNoNothings boardMaybeColors
+        board = validBoard (catNoNothings boardMaybeColumns)
+    in case (color,board) of
+       (Nothing, _) -> Nothing
+       (_, Nothing) -> Nothing
+       (Just x, Just y) -> Just (x,y)
+  otherwise -> Nothing
+  where strs = lines file
+        colorFromStr str =
+          case str of
+          "Red" -> Just Red
+          "Yellow" -> Just Yellow
+          otherwise -> Nothing
+        colorFromChar c = 
+          case c of
+          'o' -> Just Red
+          'x' -> Just Yellow
+          otherwise -> Nothing
+
+catNoNothings :: [Maybe a] -> Maybe [a]
+catNoNothings [] = Just []
+catNoNothings (x:xs) =
+  case (catNoNothings xs,x) of
+  (Nothing, _) -> Nothing
+  (_, Nothing) -> Nothing
+  (Just lst, Just x) -> Just (x:lst)
+
+validBoard board = 
+  case board of
+  Nothing -> Nothing
+  Just xs -> if length (filter (\x -> length x < 7) xs) == 7
+             then Just xs
+             else Nothing
 -- 
 -- Story 13
 --
