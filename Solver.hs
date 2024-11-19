@@ -129,8 +129,8 @@ maybeinator (x:xs) =
         | otherwise   = Just Red : aux ys (num+1) 
  in aux x 0 : maybeinator xs
 
-
--- converts the board into a String 
+-- Converts the board into a single String. 
+-- Without a proper IO function, the board is printed as a single string on a single line. 
 showRows :: [[Maybe Color]] -> String
 showRows [] = []
 showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
@@ -139,7 +139,6 @@ showRows (x:xs) = showRow x ++ "\n" ++ showRows xs
             | y == Just Red     = " o" ++ showRow ys
             | y == Just Yellow  = " x" ++ showRow ys
             | otherwise         = " ." ++ showRow ys
-
 
 -- Combines the code of maybeinator and showRows to print out the current state of the board and whose turn it is.
 prettyPrint :: Game -> String
@@ -270,6 +269,22 @@ validBoard board =
 -- Story 13
 --
 
+-- Turns a game state into a string in order to load a game into a file.
+-- The resulting text format: "o\nxox\nox\nxoxx\nxxxo\nooxxo\noxxoo\nx\n"
+-- The first character is the current player, while eveything else belongs to a column.
+showGame :: Game -> String
+showGame (player,board) = unlines $ [showColor player]:[showColumn col | col <- board]
+  where showColumn col = [showColor color | color <- col]
+
+-- Helper function for showGame. Turns a color into a character
+showColor :: Color -> Char
+showColor Red = 'o'
+showColor Yellow = 'x'
+
+-- 
+-- End of Story 13
+--  
+
 -- 
 -- Story 14
 --
@@ -281,6 +296,7 @@ validBoard board =
 -- 
 -- Story 16
 --
+
 
 
 
