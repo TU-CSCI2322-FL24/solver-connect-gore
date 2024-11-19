@@ -287,8 +287,13 @@ showColor Yellow = 'x'
 
 -- 
 -- Story 14
---
+writeGame :: Game -> FilePath -> IO ()
+writeGame game filePath = writeFilePath filePath (showGame game)
 
+loadGame :: FilePath -> IO Game
+loadGame filePath = do
+	cont <- readFile filePath
+	return (readGame cont)
 -- 
 -- Story 15
 --
