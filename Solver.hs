@@ -1,26 +1,13 @@
 -- implementation option 1
 import Data.List 
-import Data.Maybe
+
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
 type Move = Int
 data Winner = Won Color | Tie deriving (Show, Eq)
 
-r :: Color
-r = Red
-
-e :: Color
-e = Yellow
-
-tieBoard :: Board
-tieBoard = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r,e],[e,r,e,e,e,r],[e,r,e,e,r,e],[r,r,r,e,r,e],[e,e,e,r,e,r]]
-
-incomplete1 = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r],[e,r,e,e,e],[e,r,e,e,r,e],[r,r,r,e,r,e],[e,e,e,r,e,r]]
-incomplete2 = [[e,r,e,r,e,r],[r,r,e,r,e,r],[r,e,r,r,r,e],[e,r,e,e,e,r],[e,r,e,e,r,e],[r,r,r,e],[e,e,e,r]]
--- 
--- Story 3
--- 
+--Story 3
 
 -- Simple function to make a move by dropping a piece into the specified column
 makeMove :: Game -> Move -> Game
@@ -33,7 +20,7 @@ makeMove (currentColor, board) move =
 
 -- Drops a piece into the first available position in a column
 dropPiece :: Color -> [Color] -> [Color]
-dropPiece color column = reverse (color : reverse column)
+dropPiece color column = column ++ [color]
 
 -- Function to switch to the next player's color. I made it since we need to deicide who's next.
 nextColor :: Color -> Color
@@ -41,15 +28,15 @@ nextColor Red = Yellow
 nextColor Yellow = Red
 
 
-position :: Board -> Int -> [Move] -> [Move]
+position :: Board -> Int ->[Move] -> [Move]
 position [] index acc = acc
 position (x:xs) index acc  
-    |length x == 6 = position xs (index +1) acc
+    |length x == 6 =  position xs (index+1) acc
     |otherwise     = position xs (index +1) (index:acc)
     
 
 validMoves :: Game -> [Move]
-validMoves (_,board) = reverse( position board 0 [])
+validMoves (_,board) =reverse( position board 0 [])
 
 
 checkWinner :: Game -> Maybe Winner
@@ -62,7 +49,7 @@ checkWinner game@(_,brd) =
                else Just(Won Red)
           else Just (Won Yellow)
 
--- checks the bottom row of a board for a win, returning a list of winning colors
+--checks the bottom row of a board for a win, returning a list of winning colors
 checkRow brd =
   let aux 4 clr xs = [clr]
       aux 0 _ (x:xs) = if x == [] then aux 0 Red xs
@@ -74,12 +61,12 @@ checkRow brd =
              else aux 1 (head x) xs
   in if head brd == [] then aux 0 Red (tail brd) else aux 1 (head (head brd)) (tail brd)
 
--- checks all rows for win, returning a list of winning colors
+--checks all rows for win, returning a list of winning colors
 checkHorizontal brd = 
   if length (filter (\x -> length x > 0) brd) < 4 then []
   else (checkRow brd) ++ (checkHorizontal (map (\x -> if x == [] then [] else tail x) brd))
 
--- checks one column for a win, returning list of winning colors
+--checks one column for a win, returning list of winning colors
 checkColumn col =
   let aux 4 clr _ = [clr]
       aux _ _ [] = []
@@ -89,11 +76,11 @@ checkColumn col =
   in if col == [] then []
      else aux 1 (head col) (tail col)
 
--- checks all columns for a win, returning a list of winning colors
+--checks all columns for a win, returning a list of winning colors
 checkVertical brd = concat (map checkColumn brd)
 
 
--- checks if the bottom left 4x4 has a diagonal win this way /, returning list of winning colors
+--checks if the bottom left 4x4 has a diagonal win this way /, returning list of winning colors
 checkSquareOne :: Board -> [Color]
 checkSquareOne brd =
   if length brd < 4 then []
@@ -106,7 +93,7 @@ checkSquareOne brd =
                in if head (tail c2) == clr && head (tail (tail c3)) == clr && head (tail (tail (tail c4))) == clr then [clr]
                   else []
 
--- same as above but for diagonal this way \
+--same as above but for diagonal this way \
 checkSquareTwo :: Board -> [Color]
 checkSquareTwo brd =
   if length brd < 4 then []
@@ -119,7 +106,7 @@ checkSquareTwo brd =
                in if head (tail c3) == clr && head (tail (tail c2)) == clr && head (tail (tail (tail c1))) == clr then [clr]
                   else []
 
--- checks board for diagonals in a bottom-up, left to right manner, returning list of winning colors
+--checks board for diagonals in a bottom-up, left to right manner, returning list of winning colors
 checkDiagonal :: Board -> [Color]
 checkDiagonal brd = 
   if filter (\x -> length x > 0) brd == [] then []
@@ -127,12 +114,11 @@ checkDiagonal brd =
            aux chunk = checkSquareOne chunk ++ (checkSquareTwo chunk) ++ (aux (tail chunk))
        in (aux brd) ++ (checkDiagonal (map (\x -> if x == [] then [] else tail x) brd))
 
--- 
--- Story 5 
--- 
 
--- Takes a board and turns it into Maybe Colors. 
--- If a column isn't filled to its maximum length, then the rest of the column is filled up with Nothings.
+-- Story 5 
+
+-- takes a board and turns it into Maybe Colors, if a column isn't filled to its maximum length, 
+-- then Nothings are used to fill it up
 maybeinator :: Board -> [[Maybe Color]]
 maybeinator [] = [] 
 maybeinator (x:xs) = 
@@ -181,9 +167,11 @@ whoWillWin game@(color,_) =
        Nothing -> 
             let nextGames = map (makeMove game) (validMoves game) 
                 options = map whoWillWin nextGames
-            in case color of
-               Red -> if (Won Red) `elem` options then (Won Red) else if Tie `elem` options then Tie else (Won Yellow)
-               Yellow-> if (Won Yellow) `elem` options then (Won Yellow) else if Tie `elem` options then Tie else (Won Red)
+            in if (Won color) `elem` options 
+               then (Won color) 
+               else if Tie `elem` options 
+                    then Tie 
+                    else (Won (nextColor color))
 -- 
 -- End of Story 9
 --           
@@ -191,15 +179,92 @@ whoWillWin game@(color,_) =
 -- 
 -- Story 10
 --               
- 
+bestMove :: Game -> Maybe Move
+bestMove game@(color,_) = 
+    let moves = validMoves game
+        moveResultPairs = map (\x -> (x,whoWillWin (makeMove game x))) moves
+        winningMove = keyByVal (Won color) moveResultPairs
+    in case winningMove of
+       Just x  -> Just x
+       Nothing -> 
+         let tyingMove = keyByVal Tie moveResultPairs
+         in case tyingMove of
+            Just x -> Just x
+            Nothing -> keyByVal (Won (nextColor color)) moveResultPairs
+          
+keyByVal x [] = Nothing
+keyByVal x ((key,val):pairs) =
+  if val == x
+  then Just key
+  else keyByVal x pairs
+-- 
+-- End of Story 10
+--           
+
 -- 
 -- Story 11
---                       
-                            
+--
+
+-- Turns a game state into a string in order to load a game into a file.
+-- The resulting text format: "Red\nxox\nox\nxoxx\nxxxo\nooxxo\noxxoo\nx"
+writeGame :: Game -> String
+writeGame (player,columns) = show player ++ "\n" ++ writeColumns columns
+  where writeColumns columns = unlines $ [ writeColumn col | col <- columns]
+
+-- Helper function for writeGame. Turns a column into a string
+writeColumn :: [Color] -> String
+writeColumn [] = "" 
+writeColumn (x:xs) 
+  | x == Red  = "o" ++ writeColumn xs
+  | otherwise = "x" ++ writeColumn xs
+-- 
+-- End of Story 11
+--  
+
 -- 
 -- Story 12
 --
-                              
+readGame :: String -> Maybe Game       
+readGame file =
+  case length strs of
+  8 -> 
+    let colorStr = head strs
+        boardStrs = tail strs
+        color = colorFromStr colorStr
+        boardMaybeColors = map (map colorFromChar) boardStrs
+        boardMaybeColumns = map catNoNothings boardMaybeColors
+        board = validBoard (catNoNothings boardMaybeColumns)
+    in case (color,board) of
+       (Nothing, _) -> Nothing
+       (_, Nothing) -> Nothing
+       (Just x, Just y) -> Just (x,y)
+  otherwise -> Nothing
+  where strs = lines file
+        colorFromStr str =
+          case str of
+          "Red" -> Just Red
+          "Yellow" -> Just Yellow
+          otherwise -> Nothing
+        colorFromChar c = 
+          case c of
+          'o' -> Just Red
+          'x' -> Just Yellow
+          otherwise -> Nothing
+
+catNoNothings :: [Maybe a] -> Maybe [a]
+catNoNothings [] = Just []
+catNoNothings (x:xs) =
+  case (catNoNothings xs,x) of
+  (Nothing, _) -> Nothing
+  (_, Nothing) -> Nothing
+  (Just lst, Just x) -> Just (x:lst)
+
+validBoard board = 
+  case board of
+  Nothing -> Nothing
+  Just xs -> if length (filter (\x -> length x < 7) xs) == 7
+             then Just xs
+             else Nothing
 -- 
 -- Story 13
 --
@@ -222,16 +287,16 @@ showColor Yellow = 'x'
 
 -- 
 -- Story 14
---               
- 
+--
+
 -- 
 -- Story 15
---                       
-                                  
+--
+
 -- 
 -- Story 16
 --
-    
+
 
 
 
