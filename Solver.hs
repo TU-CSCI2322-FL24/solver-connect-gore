@@ -202,24 +202,9 @@ keyByVal x ((key,val):pairs) =
 --           
 
 -- 
--- Story 11
+-- Story 11:    String format of game: "o\nxox\nox\nxoxx\nxxxo\nooxxo\noxxoo\nx\n"
+--                  where the first 'o' or 'x' is the current player and each column is separated by a \n (newline)
 --
-
--- Turns a game state into a string in order to load a game into a file.
--- The resulting text format: "Red\nxox\nox\nxoxx\nxxxo\nooxxo\noxxoo\nx"
-writeGame :: Game -> String
-writeGame (player,columns) = show player ++ "\n" ++ writeColumns columns
-  where writeColumns columns = unlines $ [ writeColumn col | col <- columns]
-
--- Helper function for writeGame. Turns a column into a string
-writeColumn :: [Color] -> String
-writeColumn [] = "" 
-writeColumn (x:xs) 
-  | x == Red  = "o" ++ writeColumn xs
-  | otherwise = "x" ++ writeColumn xs
--- 
--- End of Story 11
---  
 
 -- 
 -- Story 12
@@ -266,6 +251,10 @@ validBoard board =
              then Just xs
              else Nothing
 -- 
+-- End of Story 12
+--      
+
+-- 
 -- Story 13
 --
 
@@ -280,7 +269,6 @@ showGame (player,board) = unlines $ [showColor player]:[showColumn col | col <- 
 showColor :: Color -> Char
 showColor Red = 'o'
 showColor Yellow = 'x'
-
 -- 
 -- End of Story 13
 --  
@@ -290,7 +278,7 @@ showColor Yellow = 'x'
 --
 
 -- 
--- Story 15
+-- Story 15:      already files with test cases to satisfy story 15
 --
 
 -- 
