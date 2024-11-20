@@ -61,7 +61,7 @@ checkWinner game@(_,brd) =
                              else Nothing
      else if Red `elem` winnerLst
           then if Yellow `elem` winnerLst then Just Tie
-               else Just(Won Red)
+               else Just (Won Red)
           else Just (Won Yellow)
 
 -- Checks the bottom row of a board for a win, returning a list of winning colors
@@ -284,7 +284,7 @@ validBoard board =
 
 -- Turns a game state into a string in order to load a game into a file.
 -- The resulting text format: "o\nxox\nox\nxoxx\nxxxo\nooxxo\noxxoo\nx\n"
--- The first character('o' or 'x') is the current player, while eveything else belongs to a column.
+-- The first character ('o' or 'x') is the current player, while eveything else belongs to a column.
 showGame :: Game -> String
 showGame (player,board) = unlines $ [showColor player]:[showColumn col | col <- board]
   where showColumn col = [showColor color | color <- col]
