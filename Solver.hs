@@ -308,10 +308,14 @@ putBestMove game = do
 			putStrLn $ "Winner " ++ show winner
 		Nothing -> putStrLn "No best move available"
 
+getFilename :: [String] -> IO String
+getFileName (x:xs) = return x
+getFileName [] = do putStr "Enter the file path:"
 
 main :: IO()
-main = do
-	putStr "enter the file path: "
+main = 
+    do args <- getArgs
+    	filepath <- if null args then getFileName else return head args
 	filePath <- getLine
 	game <- loadGame filePath
 	putBestMove game
