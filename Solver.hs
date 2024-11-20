@@ -227,8 +227,8 @@ readGame file =
   where strs = lines file
         colorFromStr str =
           case str of
-          "o" -> Just Red
-          "x" -> Just Yellow
+          "Red" -> Just Red
+          "Yellow" -> Just Yellow
           otherwise -> Nothing
         colorFromChar c = 
           case c of
@@ -260,7 +260,7 @@ validBoard board =
 
 -- Turns a game state into a string in order to load a game into a file.
 -- The resulting text format: "o\nxox\nox\nxoxx\nxxxo\nooxxo\noxxoo\nx\n"
--- The first character is the current player, while eveything else belongs to a column.
+-- The first character('o' or 'x') is the current player, while eveything else belongs to a column.
 showGame :: Game -> String
 showGame (player,board) = unlines $ [showColor player]:[showColumn col | col <- board]
   where showColumn col = [showColor color | color <- col]
@@ -278,7 +278,7 @@ showColor Yellow = 'x'
 --
 
 -- 
--- Story 15:      already files with test cases to satisfy story 15
+-- Story 15:      Already created files with test cases to satisfy story 15
 --
 
 -- 
