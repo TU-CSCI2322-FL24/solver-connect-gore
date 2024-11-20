@@ -34,7 +34,7 @@ nextColor Yellow = Red
 -- 
 -- Story 4
 -- 
-position :: Board -> Int ->[Move] -> [Move]
+position :: Board -> Int -> [Move] -> [Move]
 position [] index acc = acc
 position (x:xs) index acc  
     |length x == 6 = position xs (index+1) acc
