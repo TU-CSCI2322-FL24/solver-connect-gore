@@ -287,13 +287,35 @@ showColor Yellow = 'x'
 
 -- 
 -- Story 14
-writeGame :: Game -> FilePath -> IO ()
-writeGame game filePath = writeFilePath filePath (showGame game)
+writegame :: Game -> FilePath -> IO ()
+writegame game filePath = writeFile filePath (showGame game)
 
 loadGame :: FilePath -> IO Game
 loadGame filePath = do
-	cont <- readFile filePath
-	return (readGame cont)
+	cont <- readFile filePath 
+	case readGame cont of
+		Just game -> return game
+		Nothing -> do
+			putStrLn "Invalid game format"
+			error "Failed to load file"			
+
+putBestMove :: Game -> IO ()
+putBestMove game = do
+	case bestMove game of
+		Just move -> do
+			let winner = whoWillWin game
+			putStrLn $ "The best move is " ++ show move
+			putStrLn $ "Winner " ++ show winner
+		Nothing -> putStrLn "No best move available"
+
+
+main :: IO()
+main = do
+	putStr "enter the file path: "
+	filePath <- getLine
+	game <- loadGame filePath
+	putBestMove game
+
 -- 
 -- Story 15
 --
