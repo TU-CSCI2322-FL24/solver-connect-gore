@@ -306,7 +306,7 @@ putBestMove game = do
 			let winner = whoWillWin game
 			putStrLn $ "The best move is " ++ show move
 			putStrLn $ "Winner " ++ show winner
-		Nothing -> putStrLn "No best move available"
+		Nothing -> putStrLn "Game is complete"
 
 getFilename :: [String] -> IO String
 getFileName (x:xs) = return x
