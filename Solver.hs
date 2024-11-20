@@ -227,8 +227,8 @@ readGame file =
   where strs = lines file
         colorFromStr str =
           case str of
-          "Red" -> Just Red
-          "Yellow" -> Just Yellow
+          "o" -> Just Red
+          "x" -> Just Yellow
           otherwise -> Nothing
         colorFromChar c = 
           case c of
