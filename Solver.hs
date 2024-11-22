@@ -291,14 +291,14 @@ showColor Yellow = 'x'
 writegame :: Game -> FilePath -> IO ()
 writegame game filePath = writeFile filePath (showGame game)
 
-loadGame :: FilePath -> IO Game
+loadGame :: FilePath -> IO (Maybe Game)
 loadGame filePath = do
         cont <- readFile filePath 
         case readGame cont of
-                Just game -> return game
+                Just game -> return (Just game)
                 Nothing -> do
                         putStrLn "Invalid game format"
-                        error "Failed to load file"                        
+                        return Nothing                 
 
 putBestMove :: Game -> IO ()
 putBestMove game = do
@@ -315,15 +315,17 @@ getFileName [] = do putStr "Enter the file path:"
                     hFlush stdout
                     answer <- getLine
                     return answer
+ 
 
 main :: IO()
 main = 
     do args <- getArgs
-       filepath <- if null args then getFileName [] else return head args
+       filepath <- getFileName args
+       loadResult <- loadGame filepath
+       case loadResult of 
+        Just game -> putBestMove game
+        Nothing -> putStrLn "Failed to load game"
 
-       filepath <- getLine
-       game <- loadGame filepath
-       putBestMove game
 
 -- 
 -- Story 15
