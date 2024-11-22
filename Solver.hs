@@ -6,50 +6,6 @@ data Color = Red | Yellow deriving (Show, Eq)
 type Move = Int
 data Winner = Won Color | Tie deriving (Show, Eq)
 
--- 
--- Story 3
--- 
-
--- Simple function to make a move by dropping a piece into the specified column
-makeMove :: Game -> Move -> Game
-makeMove (currentColor, board) move =
-  -- It's the step we split the array to insert the color for the move.
-  case splitAt move board of
-    (leftCols, (column:rightCols)) -> let updatedColumn = dropPiece currentColor column
-      in (nextColor currentColor, leftCols ++ (updatedColumn : rightCols)) -- Return new col
-    _ -> error "invalid move"
-    
-
-
--- Drops a piece into the first available position in a column
-dropPiece :: Color -> [Color] -> [Color]
-dropPiece color column = column ++ [color]
-
--- Function to switch to the next player's color. I made it since we need to deicide who's next.
-nextColor :: Color -> Color
-nextColor Red = Yellow
-nextColor Yellow = Red
--- 
--- End of Story 3
--- 
-
--- 
--- Story 4
--- 
-position :: Board -> Int -> [Move] -> [Move]
-position [] index acc = acc
-position (x:xs) index acc  
-    |length x == 6 = position xs (index+1) acc
-    |otherwise     = position xs (index+1) (index:acc)
-    
-
-validMoves :: Game -> [Move]
-validMoves (_,board) = reverse (position board 0 [])
--- 
--- End of Story 4
--- 
-
-
 
 -- 
 -- Story 2
@@ -133,8 +89,47 @@ checkDiagonal brd =
 -- End of Story 2
 -- 
 
+-- 
+-- Story 3
+-- 
 
+-- Simple function to make a move by dropping a piece into the specified column
+makeMove :: Game -> Move -> Game
+makeMove (currentColor, board) move =
+  -- It's the step we split the array to insert the color for the move.
+  case splitAt move board of
+    (leftCols, (column:rightCols)) -> let updatedColumn = dropPiece currentColor column
+      in (nextColor currentColor, leftCols ++ (updatedColumn : rightCols)) -- Return new col
+    _ -> error "invalid move"
+    
+-- Drops a piece into the first available position in a column
+dropPiece :: Color -> [Color] -> [Color]
+dropPiece color column = column ++ [color]
 
+-- Function to switch to the next player's color. I made it since we need to deicide who's next.
+nextColor :: Color -> Color
+nextColor Red = Yellow
+nextColor Yellow = Red
+-- 
+-- End of Story 3
+-- 
+
+-- 
+-- Story 4
+-- 
+
+-- Helper function for validMoves
+position :: Board -> Int -> [Move] -> [Move]
+position [] index acc = acc
+position (x:xs) index acc  
+    |length x == 6 = position xs (index+1) acc
+    |otherwise     = position xs (index+1) (index:acc)
+    
+validMoves :: Game -> [Move]
+validMoves (_,board) = reverse (position board 0 [])
+-- 
+-- End of Story 4
+-- 
 
 -- 
 -- Story 5 
@@ -185,7 +180,7 @@ prettyPrint (curr,brd) = "Current players turn: " ++ show curr ++ "\n" ++ showRo
 -- 
 
 -- Chooses the move with the best outcome for the current player by using validMoves to consider all the 
--- valid moves, and each moves resulting game state.
+-- valid moves, and each move's resulting game state.
 whoWillWin :: Game -> Winner
 whoWillWin game@(color,_) =  
     case checkWinner game of
@@ -229,7 +224,8 @@ keyByVal x ((key,val):pairs) =
 
 -- 
 -- Story 11:    String format of game: "o\nxox\nox\nxoxx\nxxxo\nooxxo\noxxoo\nx\n"
---                  where the first 'o' or 'x' is the current player and each column is separated by a \n (newline)
+--                  where the first 'o' or 'x' is the current player and each column is 
+--                  separated by a \n (newline)
 --
 
 -- 
