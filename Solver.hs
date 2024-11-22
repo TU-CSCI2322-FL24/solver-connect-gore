@@ -1,5 +1,6 @@
 import Data.List 
-
+import System.Environment
+import System.IO
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
@@ -297,7 +298,44 @@ showColor Yellow = 'x'
 
 -- 
 -- Story 14
---
+writegame :: Game -> FilePath -> IO ()
+writegame game filePath = writeFile filePath (showGame game)
+
+loadGame :: FilePath -> IO (Maybe Game)
+loadGame filePath = do
+        cont <- readFile filePath 
+        case readGame cont of
+                Just game -> return (Just game)
+                Nothing -> do
+                        putStrLn "Invalid game format"
+                        return Nothing                 
+
+putBestMove :: Game -> IO ()
+putBestMove game = do
+        case bestMove game of
+                Just move -> do
+                        let winner = whoWillWin game
+                        putStrLn $ "The best move is " ++ show move
+                        putStrLn $ "Winner " ++ show winner
+                Nothing -> putStrLn "Game is complete"
+
+getFileName :: [String] -> IO String
+getFileName (x:xs) = return x
+getFileName [] = do putStr "Enter the file path:"
+                    hFlush stdout
+                    answer <- getLine
+                    return answer
+ 
+
+main :: IO()
+main = 
+    do args <- getArgs
+       filepath <- getFileName args
+       loadResult <- loadGame filepath
+       case loadResult of 
+        Just game -> putBestMove game
+        Nothing -> putStrLn "Failed to load game"
+
 
 -- 
 -- Story 15:      Already created files with test cases to satisfy story 15
