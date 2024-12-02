@@ -327,7 +327,7 @@ getFileName [] = do putStr "Enter the file path:"
                     return answer
  
 
-main :: IO()
+main :: IO ()
 main = 
     do args <- getArgs
        filepath <- getFileName args
@@ -345,7 +345,46 @@ main =
 -- Story 16
 --
 
+-- 
+-- Story 17
+--
 
+-- 
+-- Story 18
+--
 
+-- 
+-- Story 19
+--
 
+-- 
+-- Story 20
+--
 
+-- 
+-- Story 21
+--
+
+-- 
+-- Story 22
+--
+
+-- 
+-- Story 23
+--
+
+-- 
+-- Story 24
+--
+
+-- 
+-- Story 25
+--
+
+-- 
+-- Story 26
+--
+
+-- 
+-- Story 27
+--
