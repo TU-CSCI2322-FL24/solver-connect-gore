@@ -298,6 +298,7 @@ showColor Yellow = 'x'
 
 -- 
 -- Story 14
+-- 
 writegame :: Game -> FilePath -> IO ()
 writegame game filePath = writeFile filePath (showGame game)
 
@@ -335,7 +336,9 @@ main =
        case loadResult of 
         Just game -> putBestMove game
         Nothing -> putStrLn "Failed to load game"
-
+-- 
+-- End of Story 14
+--  
 
 -- 
 -- Story 15:      Already created files with test cases to satisfy story 15
@@ -348,6 +351,15 @@ main =
 -- 
 -- Story 17
 --
+
+-- all possible connect 4 () , if it is made of 2 different pieces, then the score is 0, 
+-- if it has only 1 color, then add a point for every piece that is of the current player's color, and 
+-- subtract a point for every piece that is of the opponent's color 
+rateGame :: Game -> Rating
+rateGame game@(curr,brd) = undefined
+
+
+
 
 -- type Game = (Color,Board)
 
@@ -367,6 +379,9 @@ main =
 --   ++ checkDiags (ys:zs:ws:rest)
 
 
+-- 
+-- End of Story 17
+--  
 
 -- 
 -- Story 18
