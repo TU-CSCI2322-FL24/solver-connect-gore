@@ -24,6 +24,7 @@ checkWinner game@(_,brd) =
           else Just (Won Yellow)
 
 -- Checks the bottom row of a board for a win, returning a list of winning colors
+ 
 checkRow brd =
   let aux 4 clr xs = [clr]
       aux 0 _ (x:xs) = if x == [] then aux 0 Red xs
@@ -352,15 +353,13 @@ main =
 -- Story 17
 --
 
--- all possible connect 4 () , if it is made of 2 different pieces, then the score is 0, 
--- if it has only 1 color, then add a point for every piece that is of the current player's color, and 
--- subtract a point for every piece that is of the opponent's color 
+-- Rates all possible connect 4. If it is made of 2 different pieces, then the score is 0. 
+-- If it has only 1 color, then add a point for every piece that is of that color.
+-- Red is a positive score and Yellow is a negative score.
 rateGame :: Game -> Rating
-rateGame game@(curr,brd) = undefined
+rateGame game@(_,brd) = rateVertical brd + (rateHorizontal brd) + (rateDiags brd)
   
-  | Red `elem` list && Yellow `elem` list = 0
-  | otherwise                             = count Red list - count Yellow list
-
+-- Gives a rating for a list of four Colors, adding a point for each Color of the same type.
 count :: Color -> [Color] -> Rating
 count color [] = 0
 count color (x:xs) = 
@@ -368,58 +367,39 @@ count color (x:xs) =
     then 1 + count color xs
     else count color xs
 
-rateVertical :: 
-rateVertical =
-brd@(col@():rest)
-
+-- Takes a list of four Colors and computes their rating. Red is a positive score and 
+-- Yellow is a negative score. If the list has Red and Yellow in it than it doesn't score.
+rateFour :: [Color] -> Rating
+rateFour list =
   | Red `elem` list && Yellow `elem` list = 0
   | otherwise                             = count Red list - count Yellow list
 
+-- Used to determine a rating amongst multiple columns. 
+-- Used by the row rating function and diagonal rating function.
+rateFourColumns :: [Color] -> [Color] -> [Color] -> [Color] -> Rating
+rateFourColumns (x:xs) (y:ys) (z:zs) (w:ws) = rateFour [x,y,z,w] + rateFourColumns xs ys zs ws 
+rateFourColumns _ _ _ _ = 0
 
+-- Rates all of the rows
+rateHorizontal :: Board -> Rating 
+rateHorizontal (xs:ys:zs:ws:rest) = rateFourColumns xs ys zs ws + rateHorizontal (ys:zs:ws:rest)
+rateHorizontal _ = 0
 
-checkFour (Red:_) (Red:_) (Red:_) (Red:_) = 4 
-checkFour (Yellow:_) (Yellow:_) (Yellow:_) (Yellow:_) = -4
-checkFour (_:xs) (_:ys) (_:zs) (_:ws) = 0 + checkFour xs ys zs ws
-checkFour _ _ _ _ = 0
+-- Rates a single column
+rateColumn :: [Color] -> Rating
+rateColumn (x:y:z:w:rest) = rateFour [x,y,z,w] + rateColumn (y:z:w:rest)
+rateColumn _ = 0
 
-checkHorizontal (xs:ys:zs:ws:rest) = checkFour xs ys zs ws + checkHorizontal (ys:zs:ws:rest)
-checkHorizontal _ = 0
+-- Rates all of the columns
+rateVeritcal :: Board -> Rating
+rateVeritcal board = sum [rateColumn col | col <- board]
 
-checkVertical (y@(x,xs):ys) = 
-
--- Checks all columns for a win, returning a list of winning colors
-checkVertical brd = concat (map checkColumn brd)
-  where checkColumn col =
-          let aux 4 clr _ = [clr]
-              aux _ _ [] = []
-              aux i clr (x:xs) =
-                if x == clr 
-                  then aux (i+1) x xs
-                  else aux 1 x xs
-          in if col == [] 
-              then []
-              else aux 1 (head col) (tail col)
-
-checkDiags (xs:ys:zs:ws:rest) =
-  checkFour xs (drop 1 ys) (drop 2 zx) (drop 3 ws)
-  ++ checkfour (drop 3 xs) ( check 2 ys) (drop 1 zs) ws
-  ++ checkDiags (ys:zs:ws:rest)
-
-
-
-
-
-  -- let winnerLst = checkVertical brd ++ (checkHorizontal brd) ++ (checkDiagonal brd)
-  -- in if winnerLst == [] 
-  --     then if validMoves game == [] 
-  --           then Just Tie
-  --           else Nothing
-  --     else if Red `elem` winnerLst
-  --           then if Yellow `elem` winnerLst 
-  --                 then Just Tie
-  --                 else Just (Won Red)
-  --           else Just (Won Yellow)
-
+-- Rates all of the diagonals
+rateDiags :: Board -> Rating
+rateDiags (xs:ys:zs:ws:rest) =
+  rateFourColumns xs (drop 1 ys) (drop 2 zx) (drop 3 ws)
+  + rateFourColumns (drop 3 xs) ( check 2 ys) (drop 1 zs) ws
+  + checkDiags (ys:zs:ws:rest)
 -- 
 -- End of Story 17
 --  
