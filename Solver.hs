@@ -1,12 +1,36 @@
 import Data.List 
 import System.Environment
 import System.IO
+import System.Console.GetOpt
+
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
 type Move = Int
 data Winner = Won Color | Tie deriving (Show, Eq)
 
+--Main, Flags
+
+data Flag = FindWinner deriving (Show, Eq)
+
+options :: [OptDescr Flag]
+options = [ Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move."
+          ]
+
+main :: IO ()
+main = 
+    do args <- getArgs
+       let (flags, inputs, errors) = getOpt Permute options args
+       filepath <- getFileName inputs
+       loadResult <- loadGame filepath
+       case loadResult of 
+        Just game -> dispatch flags game
+        Nothing -> putStrLn "Failed to load game"
+
+dispatch :: [Flag] -> Game -> IO ()
+dispatch flags game
+  | FindWinner `elem` flags   = putBestMove game
+  | otherwise                 = putStrLn "Coming soon"
 
 -- 
 -- Story 2
@@ -327,15 +351,6 @@ getFileName [] = do putStr "Enter the file path:"
                     answer <- getLine
                     return answer
  
-
-main :: IO ()
-main = 
-    do args <- getArgs
-       filepath <- getFileName args
-       loadResult <- loadGame filepath
-       case loadResult of 
-        Just game -> putBestMove game
-        Nothing -> putStrLn "Failed to load game"
 -- 
 -- End of Story 14
 --  
@@ -355,7 +370,7 @@ main =
 -- all possible connect 4 () , if it is made of 2 different pieces, then the score is 0, 
 -- if it has only 1 color, then add a point for every piece that is of the current player's color, and 
 -- subtract a point for every piece that is of the opponent's color 
-rateGame :: Game -> Rating
+rateGame :: Game -> Int
 rateGame game@(curr,brd) = undefined
 
 -- 
