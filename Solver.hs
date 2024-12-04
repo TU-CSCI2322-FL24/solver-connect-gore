@@ -1,4 +1,6 @@
 import Data.List 
+import System.Environment
+import System.IO
 
 type Game  = (Color,Board)
 type Board = [[Color]]
