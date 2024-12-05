@@ -2,12 +2,14 @@ import Data.List
 import System.Environment
 import System.IO
 import System.Console.GetOpt
+import Debug.Trace
 
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
 type Move = Int
 data Winner = Won Color | Tie deriving (Show, Eq)
+type Rating = Int
 
 --Main, Flags
 
@@ -270,12 +272,12 @@ readGame file =
        (Nothing, _) -> Nothing
        (_, Nothing) -> Nothing
        (Just x, Just y) -> Just (x,y)
-  otherwise -> Nothing
+  otherwise ->  Nothing
   where strs = lines file
         colorFromStr str =
           case str of
-          "Red" -> Just Red
-          "Yellow" -> Just Yellow
+          "o" -> Just Red
+          "x" -> Just Yellow
           otherwise -> Nothing
         colorFromChar c = 
           case c of
@@ -370,7 +372,7 @@ getFileName [] = do putStr "Enter the file path:"
 -- all possible connect 4 () , if it is made of 2 different pieces, then the score is 0, 
 -- if it has only 1 color, then add a point for every piece that is of the current player's color, and 
 -- subtract a point for every piece that is of the opponent's color 
-rateGame :: Game -> Int
+rateGame :: Game -> Rating
 rateGame game@(curr,brd) = undefined
 
 -- 
