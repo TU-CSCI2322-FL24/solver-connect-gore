@@ -1,13 +1,39 @@
 import Data.List 
 import System.Environment
 import System.IO
+import System.Console.GetOpt
+import Debug.Trace
+
 
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
 type Move = Int
 data Winner = Won Color | Tie deriving (Show, Eq)
+type Rating = Int
 
+--Main, Flags
+
+data Flag = FindWinner deriving (Show, Eq)
+
+options :: [OptDescr Flag]
+options = [ Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move."
+          ]
+
+main :: IO ()
+main = 
+    do args <- getArgs
+       let (flags, inputs, errors) = getOpt Permute options args
+       filepath <- getFileName inputs
+       loadResult <- loadGame filepath
+       case loadResult of 
+        Just game -> dispatch flags game
+        Nothing -> putStrLn "Failed to load game"
+
+dispatch :: [Flag] -> Game -> IO ()
+dispatch flags game
+  | FindWinner `elem` flags   = putBestMove game
+  | otherwise                 = putStrLn "Coming soon"
 
 -- 
 -- Story 2
@@ -247,12 +273,12 @@ readGame file =
        (Nothing, _) -> Nothing
        (_, Nothing) -> Nothing
        (Just x, Just y) -> Just (x,y)
-  otherwise -> Nothing
+  otherwise ->  Nothing
   where strs = lines file
         colorFromStr str =
           case str of
-          "Red" -> Just Red
-          "Yellow" -> Just Yellow
+          "o" -> Just Red
+          "x" -> Just Yellow
           otherwise -> Nothing
         colorFromChar c = 
           case c of
@@ -328,15 +354,6 @@ getFileName [] = do putStr "Enter the file path:"
                     answer <- getLine
                     return answer
  
-
-main :: IO ()
-main = 
-    do args <- getArgs
-       filepath <- getFileName args
-       loadResult <- loadGame filepath
-       case loadResult of 
-        Just game -> putBestMove game
-        Nothing -> putStrLn "Failed to load game"
 -- 
 -- End of Story 14
 --  
