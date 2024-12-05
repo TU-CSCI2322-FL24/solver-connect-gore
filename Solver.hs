@@ -14,21 +14,25 @@ type Rating = Int
 
 --Main, Flags
 
-data Flag = FindWinner deriving (Show, Eq)
+data Flag = Help | FindWinner deriving (Show, Eq)
 
 options :: [OptDescr Flag]
-options = [ Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move."
+options = [ Option ['h'] ["help"] (NoArg Help) "Print usage information and exit.",
+            Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move."
           ]
 
 main :: IO ()
 main = 
     do args <- getArgs
        let (flags, inputs, errors) = getOpt Permute options args
-       filepath <- getFileName inputs
-       loadResult <- loadGame filepath
-       case loadResult of 
-        Just game -> dispatch flags game
-        Nothing -> putStrLn "Failed to load game"
+       if Help `elem` flags
+       then putStrLn $ usageInfo "Solver [options] [filename]\nConnect Four Solver." options
+       else
+         do filepath <- getFileName inputs
+            loadResult <- loadGame filepath
+            case loadResult of 
+              Just game -> dispatch flags game
+              Nothing -> putStrLn "Failed to load game"
 
 dispatch :: [Flag] -> Game -> IO ()
 dispatch flags game
