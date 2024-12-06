@@ -1,6 +1,10 @@
 import Data.List 
 import System.Environment
 import System.IO
+import System.Console.GetOpt
+import Debug.Trace
+
+
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
@@ -8,6 +12,34 @@ type Move = Int
 data Winner = Won Color | Tie deriving (Show, Eq)
 type Rating = Int
 
+-- Main, Flags
+data Flag = Help | FindWinner | DoMove String deriving (Show, Eq)
+
+options :: [OptDescr Flag]
+options = [ Option ['h'] ["help"] (NoArg Help) "Print usage information and exit.",
+            Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move.",
+            Option ['m'] ["move"] (ReqArg DoMove "<move>") "Do move <move> on the board."
+          ]
+
+main :: IO ()
+main = 
+    do args <- getArgs
+       let (flags, inputs, errors) = getOpt Permute options args
+       if Help `elem` flags
+       then putStrLn $ usageInfo "Solver [options] [filename]\nConnect Four Solver." options
+       else
+         do filepath <- getFileName inputs
+            loadResult <- loadGame filepath
+            case loadResult of 
+              Just game -> dispatch flags game
+              Nothing -> putStrLn "Failed to load game"
+
+dispatch :: [Flag] -> Game -> IO ()
+dispatch flags game
+  | FindWinner `elem` flags   = putBestMove game
+  | any isDoMove flags        = putDoMove game (getMove flags)
+  | otherwise                 = putStrLn "Coming soon"
+  
 -- 
 -- Story 2
 -- 
@@ -24,7 +56,6 @@ checkWinner game@(_,brd) =
           else Just (Won Yellow)
 
 -- Checks the bottom row of a board for a win, returning a list of winning colors
- 
 checkRow brd =
   let aux 4 clr xs = [clr]
       aux 0 _ (x:xs) = if x == [] then aux 0 Red xs
@@ -102,11 +133,14 @@ makeMove (currentColor, board) move =
   case splitAt move board of
     (leftCols, (column:rightCols)) -> let updatedColumn = dropPiece currentColor column
       in (nextColor currentColor, leftCols ++ (updatedColumn : rightCols)) -- Return new col
-    _ -> error "invalid move"
+    _ -> error "Invalid move"
     
 -- Drops a piece into the first available position in a column
 dropPiece :: Color -> [Color] -> [Color]
-dropPiece color column = column ++ [color]
+dropPiece color column = 
+  if length column < 6
+  then column ++ [color]
+  else error "Invalid move"
 
 -- Function to switch to the next player's color. I made it since we need to deicide who's next.
 nextColor :: Color -> Color
@@ -247,12 +281,12 @@ readGame file =
        (Nothing, _) -> Nothing
        (_, Nothing) -> Nothing
        (Just x, Just y) -> Just (x,y)
-  otherwise -> Nothing
+  otherwise ->  Nothing
   where strs = lines file
         colorFromStr str =
           case str of
-          "Red" -> Just Red
-          "Yellow" -> Just Yellow
+          "o" -> Just Red
+          "x" -> Just Yellow
           otherwise -> Nothing
         colorFromChar c = 
           case c of
@@ -317,7 +351,7 @@ putBestMove game = do
         case bestMove game of
                 Just move -> do
                         let winner = whoWillWin game
-                        putStrLn $ "The best move is " ++ show move
+                        putStrLn $ "The best move is " ++ show (move + 1)
                         putStrLn $ "Winner " ++ show winner
                 Nothing -> putStrLn "Game is complete"
 
@@ -327,16 +361,6 @@ getFileName [] = do putStr "Enter the file path:"
                     hFlush stdout
                     answer <- getLine
                     return answer
- 
-
-main :: IO ()
-main = 
-    do args <- getArgs
-       filepath <- getFileName args
-       loadResult <- loadGame filepath
-       case loadResult of 
-        Just game -> putBestMove game
-        Nothing -> putStrLn "Failed to load game"
 -- 
 -- End of Story 14
 --  
@@ -346,8 +370,94 @@ main =
 --
 
 -- 
--- Story 16:      Finished
---
+-- Story 16
+-- 
+eqLists :: (Eq a) => [a] -> [a] -> Bool
+eqLists xs ys = null (xs \\ ys) && null (ys \\ xs)
+
+-- Test Cases for `validMoves`
+testValidMoves :: Bool
+testValidMoves =
+  let board1 = replicate 7 []  -- Empty board
+      board2 = [[], [Red], [Red, Yellow], [], [], [Red, Red, Yellow], [Red, Red, Yellow, Yellow]]
+      board3 = replicate 7 [Red, Yellow, Red, Yellow, Red, Yellow]  -- Full board
+  in eqLists (validMoves (Red, board1)) [0..6] &&
+     eqLists (validMoves (Yellow, board2)) [0, 1, 3, 4] &&
+     null (validMoves (Red, board3))
+
+-- Test Cases for `checkWinner`
+testCheckWinner :: Bool
+testCheckWinner =
+  let boardHorizontalWin = [[Red, Red, Red, Red], [], [], [], [], [], []]
+      boardVerticalWin = [[Red], [Red], [Red], [Red], [], [], []]
+      boardDiagonalWin = [[Red], [Yellow, Red], [Yellow, Yellow, Red], [Yellow, Yellow, Yellow, Red], [], [], []]
+      boardTie = replicate 7 [Red, Yellow, Red, Yellow, Red, Yellow]
+      boardOngoing = [[Red, Yellow], [Yellow, Red], [], [], [], [], []]
+  in checkWinner (Red, boardHorizontalWin) == Just (Won Red) &&
+     checkWinner (Yellow, boardVerticalWin) == Just (Won Red) &&
+     checkWinner (Red, boardDiagonalWin) == Just (Won Red) &&
+     checkWinner (Red, boardTie) == Just Tie &&
+     checkWinner (Yellow, boardOngoing) == Nothing
+
+-- Test Cases for `makeMove`
+testMakeMove :: Bool
+testMakeMove =
+  let game1 = (Red, replicate 7 [])  -- Empty board
+      game2 = (Yellow, [[Red], [Red, Yellow], [Yellow, Yellow], [], [], [], []])
+      move1 = 0
+      move2 = 3
+      moveInvalid = 7  -- Invalid move (out of range)
+      game1Result = makeMove game1 move1
+      game2Result = makeMove game2 move2
+  in snd game1Result !! move1 == [Red] &&
+     snd game2Result !! move2 == [Yellow] &&
+     (makeMove game2 moveInvalid `seq` False) `catch` (\_ -> True)  -- Expect an error
+
+-- Test Cases for `whoWillWin`
+testWhoWillWin :: Bool
+testWhoWillWin =
+  let gameWin = (Red, [[Red], [Red], [Red], []])  -- Immediate win
+      gameLose = (Yellow, [[Yellow], [Yellow], [Yellow], []])  -- Opponent will win
+      gameTie = (Red, replicate 7 [Red, Yellow, Red, Yellow, Red, Yellow])  -- Tie
+  in whoWillWin gameWin == Won Red &&
+     whoWillWin gameLose == Won Yellow &&
+     whoWillWin gameTie == Tie
+
+-- Test Cases for `bestMove`
+testBestMove :: Bool
+testBestMove =
+  let gameImmediateWin = (Red, [[Red], [Red], [Red], [], [], [], []])
+      gameBlock = (Yellow, [[Yellow], [Yellow], [Yellow], [], [], [], []])
+      gameTie = (Red, replicate 7 [Red, Yellow, Red, Yellow, Red, Yellow])
+  in bestMove gameImmediateWin == Just 3 &&
+     bestMove gameBlock == Just 3 &&
+     bestMove gameTie == Nothing
+
+-- Test Cases for `showGame` and `readGame`
+testShowReadGame :: Bool
+testShowReadGame =
+  let game = (Red, [[Red], [Yellow, Red], [Yellow, Yellow, Red], [], [], [], []])
+      gameString = showGame game
+  in readGame gameString == Just game
+
+-- Combined Test Runner
+runTests :: IO ()
+runTests = do
+  putStrLn "Testing validMoves..."
+  print testValidMoves
+  putStrLn "Testing checkWinner..."
+  print testCheckWinner
+  putStrLn "Testing makeMove..."
+  print testMakeMove
+  putStrLn "Testing whoWillWin..."
+  print testWhoWillWin
+  putStrLn "Testing bestMove..."
+  print testBestMove
+  putStrLn "Testing showGame and readGame..."
+  print testShowReadGame
+-- 
+-- End of Story 16
+--  
 
 -- 
 -- Story 17
@@ -441,6 +551,19 @@ rateDiags _ = 0
 -- Story 25
 --
 
+isDoMove :: Flag -> Bool
+isDoMove (DoMove _) = True
+isDoMove _ = False
+
+getMove :: [Flag] -> Int
+getMove [] = 0
+getMove ((DoMove x):_) = read x
+getMove (_:flags) = getMove flags
+
+putDoMove :: Game -> Move -> IO ()
+putDoMove game move = 
+  do putStrLn "New board:"
+     putStrLn (showGame (makeMove game (move - 1)))
 -- 
 -- Story 26
 --
