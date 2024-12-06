@@ -346,7 +346,7 @@ main =
 --
 
 -- 
--- Story 16
+-- Story 16:      Finished
 --
 
 -- 
@@ -357,52 +357,54 @@ main =
 -- If it has only 1 color, then add a point for every piece that is of that color.
 -- Red is a positive score and Yellow is a negative score.
 rateGame :: Game -> Rating
-rateGame game@(_,brd) = 
-  | checkWinner game == Red     = 10000000
-  | checkWinner game == Yellow  = -10000000
-  | otherwise                   = rateVertical brd + rateHorizontal brd + rateDiags brd
-  
+rateGame game@(_,brd) 
+  | checkWinner game == Just (Won Red)      = 10000000
+  | checkWinner game == Just (Won Yellow)   = -10000000
+  | otherwise                               = rateVertical board + rateHorizontal board + rateDiags board
+    where board = maybeinator brd
+
 -- Gives a rating for a list of four Colors, adding a point for each Color of the same type.
-count :: Color -> [Color] -> Rating
+count ::  Color -> [Maybe Color] -> Rating
 count color [] = 0
 count color (x:xs) = 
-  if x == color 
+  if x == Just color 
     then 1 + count color xs
     else count color xs
 
 -- Takes a list of four Colors and computes their rating. Red is a positive score and 
 -- Yellow is a negative score. If the list has Red and Yellow in it than it doesn't score.
-rateFour :: [Color] -> Rating
-rateFour list =
-  | Red `elem` list && Yellow `elem` list = 0
-  | otherwise                             = count Red list - count Yellow list
+rateFour :: [Maybe Color] -> Rating
+rateFour list 
+  | Just Red `elem` list && Just Yellow `elem` list = 0
+  | otherwise                                       = count Red list - count Yellow list
 
 -- Used to determine a rating amongst multiple columns. 
 -- Used by the row rating function and diagonal rating function.
-rateFourColumns :: [Color] -> [Color] -> [Color] -> [Color] -> Rating
+rateFourColumns :: [Maybe Color] -> [Maybe Color] -> [Maybe Color] -> [Maybe Color] -> Rating
 rateFourColumns (x:xs) (y:ys) (z:zs) (w:ws) = rateFour [x,y,z,w] + rateFourColumns xs ys zs ws 
 rateFourColumns _ _ _ _ = 0
 
 -- Rates all of the rows
-rateHorizontal :: Board -> Rating 
+rateHorizontal :: [[Maybe Color]] -> Rating 
 rateHorizontal (xs:ys:zs:ws:rest) = rateFourColumns xs ys zs ws + rateHorizontal (ys:zs:ws:rest)
 rateHorizontal _ = 0
 
 -- Rates a single column
-rateColumn :: [Color] -> Rating
+rateColumn :: [Maybe Color] -> Rating
 rateColumn (x:y:z:w:rest) = rateFour [x,y,z,w] + rateColumn (y:z:w:rest)
 rateColumn _ = 0
 
 -- Rates all of the columns
-rateVeritcal :: Board -> Rating
-rateVeritcal board = sum [rateColumn col | col <- board]
+rateVertical :: [[Maybe Color]] -> Rating
+rateVertical board = sum [rateColumn col | col <- board]
 
 -- Rates all of the diagonals
-rateDiags :: Board -> Rating
+rateDiags :: [[Maybe Color]] -> Rating
 rateDiags (xs:ys:zs:ws:rest) =
-  rateFourColumns xs (drop 1 ys) (drop 2 zx) (drop 3 ws)
-  + rateFourColumns (drop 3 xs) ( check 2 ys) (drop 1 zs) ws
-  + checkDiags (ys:zs:ws:rest)
+  rateFourColumns xs (drop 1 ys) (drop 2 zs) (drop 3 ws)
+  + rateFourColumns (drop 3 xs) (drop 2 ys) (drop 1 zs) ws
+  + rateDiags (ys:zs:ws:rest)
+rateDiags _ = 0
 -- 
 -- End of Story 17
 --  
