@@ -357,7 +357,10 @@ main =
 -- If it has only 1 color, then add a point for every piece that is of that color.
 -- Red is a positive score and Yellow is a negative score.
 rateGame :: Game -> Rating
-rateGame game@(_,brd) = rateVertical brd + (rateHorizontal brd) + (rateDiags brd)
+rateGame game@(_,brd) = 
+  | checkWinner game == Red     = 10000000
+  | checkWinner game == Yellow  = -10000000
+  | otherwise                   = rateVertical brd + rateHorizontal brd + rateDiags brd
   
 -- Gives a rating for a list of four Colors, adding a point for each Color of the same type.
 count :: Color -> [Color] -> Rating
