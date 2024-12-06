@@ -12,8 +12,7 @@ type Move = Int
 data Winner = Won Color | Tie deriving (Show, Eq)
 type Rating = Int
 
---Main, Flags
-
+-- Main, Flags
 data Flag = Help | FindWinner | DoMove String deriving (Show, Eq)
 
 options :: [OptDescr Flag]
@@ -40,7 +39,7 @@ dispatch flags game
   | FindWinner `elem` flags   = putBestMove game
   | any isDoMove flags        = putDoMove game (getMove flags)
   | otherwise                 = putStrLn "Coming soon"
-
+  
 -- 
 -- Story 2
 -- 
@@ -362,7 +361,6 @@ getFileName [] = do putStr "Enter the file path:"
                     hFlush stdout
                     answer <- getLine
                     return answer
- 
 -- 
 -- End of Story 14
 --  
@@ -373,6 +371,7 @@ getFileName [] = do putStr "Enter the file path:"
 
 -- 
 -- Story 16
+-- 
 eqLists :: (Eq a) => [a] -> [a] -> Bool
 eqLists xs ys = null (xs \\ ys) && null (ys \\ xs)
 
@@ -456,18 +455,66 @@ runTests = do
   print testBestMove
   putStrLn "Testing showGame and readGame..."
   print testShowReadGame
---
+-- 
+-- End of Story 16
+--  
 
 -- 
 -- Story 17
 --
 
--- all possible connect 4 () , if it is made of 2 different pieces, then the score is 0, 
--- if it has only 1 color, then add a point for every piece that is of the current player's color, and 
--- subtract a point for every piece that is of the opponent's color 
+-- Rates all possible connect 4. If it is made of 2 different pieces, then the score is 0. 
+-- If it has only 1 color, then add a point for every piece that is of that color.
+-- Red is a positive score and Yellow is a negative score.
 rateGame :: Game -> Rating
-rateGame game@(curr,brd) = undefined
+rateGame game@(_,brd) 
+  | checkWinner game == Just (Won Red)      = 10000000
+  | checkWinner game == Just (Won Yellow)   = -10000000
+  | otherwise                               = rateVertical board + rateHorizontal board + rateDiags board
+    where board = maybeinator brd
 
+-- Gives a rating for a list of four Colors, adding a point for each Color of the same type.
+count ::  Color -> [Maybe Color] -> Rating
+count color [] = 0
+count color (x:xs) = 
+  if x == Just color 
+    then 1 + count color xs
+    else count color xs
+
+-- Takes a list of four Colors and computes their rating. Red is a positive score and 
+-- Yellow is a negative score. If the list has Red and Yellow in it than it doesn't score.
+rateFour :: [Maybe Color] -> Rating
+rateFour list 
+  | Just Red `elem` list && Just Yellow `elem` list = 0
+  | otherwise                                       = count Red list - count Yellow list
+
+-- Used to determine a rating amongst multiple columns. 
+-- Used by the row rating function and diagonal rating function.
+rateFourColumns :: [Maybe Color] -> [Maybe Color] -> [Maybe Color] -> [Maybe Color] -> Rating
+rateFourColumns (x:xs) (y:ys) (z:zs) (w:ws) = rateFour [x,y,z,w] + rateFourColumns xs ys zs ws 
+rateFourColumns _ _ _ _ = 0
+
+-- Rates all of the rows
+rateHorizontal :: [[Maybe Color]] -> Rating 
+rateHorizontal (xs:ys:zs:ws:rest) = rateFourColumns xs ys zs ws + rateHorizontal (ys:zs:ws:rest)
+rateHorizontal _ = 0
+
+-- Rates a single column
+rateColumn :: [Maybe Color] -> Rating
+rateColumn (x:y:z:w:rest) = rateFour [x,y,z,w] + rateColumn (y:z:w:rest)
+rateColumn _ = 0
+
+-- Rates all of the columns
+rateVertical :: [[Maybe Color]] -> Rating
+rateVertical board = sum [rateColumn col | col <- board]
+
+-- Rates all of the diagonals
+rateDiags :: [[Maybe Color]] -> Rating
+rateDiags (xs:ys:zs:ws:rest) =
+  rateFourColumns xs (drop 1 ys) (drop 2 zs) (drop 3 ws)
+  + rateFourColumns (drop 3 xs) (drop 2 ys) (drop 1 zs) ws
+  + rateDiags (ys:zs:ws:rest)
+rateDiags _ = 0
 -- 
 -- End of Story 17
 --  
