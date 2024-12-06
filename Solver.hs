@@ -14,11 +14,12 @@ type Rating = Int
 
 --Main, Flags
 
-data Flag = Help | FindWinner deriving (Show, Eq)
+data Flag = Help | FindWinner | DoMove String deriving (Show, Eq)
 
 options :: [OptDescr Flag]
 options = [ Option ['h'] ["help"] (NoArg Help) "Print usage information and exit.",
-            Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move."
+            Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move.",
+            Option ['m'] ["move"] (ReqArg DoMove "<move>") "Do move <move> on the board."
           ]
 
 main :: IO ()
@@ -37,6 +38,7 @@ main =
 dispatch :: [Flag] -> Game -> IO ()
 dispatch flags game
   | FindWinner `elem` flags   = putBestMove game
+  | any isDoMove flags        = putDoMove game (getMove flags)
   | otherwise                 = putStrLn "Coming soon"
 
 -- 
@@ -132,11 +134,14 @@ makeMove (currentColor, board) move =
   case splitAt move board of
     (leftCols, (column:rightCols)) -> let updatedColumn = dropPiece currentColor column
       in (nextColor currentColor, leftCols ++ (updatedColumn : rightCols)) -- Return new col
-    _ -> error "invalid move"
+    _ -> error "Invalid move"
     
 -- Drops a piece into the first available position in a column
 dropPiece :: Color -> [Color] -> [Color]
-dropPiece color column = column ++ [color]
+dropPiece color column = 
+  if length column < 6
+  then column ++ [color]
+  else error "Invalid move"
 
 -- Function to switch to the next player's color. I made it since we need to deicide who's next.
 nextColor :: Color -> Color
@@ -347,7 +352,7 @@ putBestMove game = do
         case bestMove game of
                 Just move -> do
                         let winner = whoWillWin game
-                        putStrLn $ "The best move is " ++ show move
+                        putStrLn $ "The best move is " ++ show (move + 1)
                         putStrLn $ "Winner " ++ show winner
                 Nothing -> putStrLn "Game is complete"
 
@@ -499,6 +504,19 @@ rateGame game@(curr,brd) = undefined
 -- Story 25
 --
 
+isDoMove :: Flag -> Bool
+isDoMove (DoMove _) = True
+isDoMove _ = False
+
+getMove :: [Flag] -> Int
+getMove [] = 0
+getMove ((DoMove x):_) = read x
+getMove (_:flags) = getMove flags
+
+putDoMove :: Game -> Move -> IO ()
+putDoMove game move = 
+  do putStrLn "New board:"
+     putStrLn (showGame (makeMove game (move - 1)))
 -- 
 -- Story 26
 --
