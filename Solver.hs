@@ -521,8 +521,29 @@ rateDiags _ = 0
 
 -- 
 -- Story 18
---
-
+--whoWillWin :: Game -> Winner
+--whoMightWin :: Game -> Int -> (Rating, Maybe Move)
+--whoMightWin game@(color,_) depth 
+--    |depth == 0 || isTerminal game == (rateGame game, Nothing)
+--    |otherwise = 
+--        let moves = validMoves game
+--            res = [(move,whoMightWin (makeMove game move) (depth -1) | move <- moves]
+--            ratedMoves = [(adjustR color rating, move) | (move, (rating, _ )) <- res]
+--        in selectBest color ratedMoves
+--adjustR :: Color -> Rating -> Rating 
+--adjustR color rating 
+--    |color == Red = rating 
+--    |color == Yellow = -rating
+--selectBest :: Color -> [(Rating , Move)] -> (Rating, Maybe Move) 
+--selectBest color ratedMoves
+--    |color == Red = maximumBy compareFst ratedMoves
+--    |color == Yellow = maximumBy compareFst ratedMoves
+--    where 
+--        compareFst (r1,_) (rs,_) = compare r1 r2
+--isTerminal :: Game -> Bool 
+--isTerminal game = case checkWinner game of 
+--    Just _ -> True 
+--    Nothing -> False 
 -- 
 -- Story 19
 --
