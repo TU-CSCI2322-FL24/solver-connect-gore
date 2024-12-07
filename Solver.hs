@@ -55,22 +55,15 @@ checkWinner game@(_,brd) =
                else Just (Won Red)
           else Just (Won Yellow)
 
--- Checks the bottom row of a board for a win, returning a list of winning colors
-checkRow brd =
-  let aux 4 clr xs = [clr]
-      aux 0 _ (x:xs) = if x == [] then aux 0 Red xs
-                       else aux 1 (head x) xs
-      aux i clr [] = []
-      aux i clr (x:xs) =
-        if x == [] then aux 0 Red xs
-        else if head x == clr then aux (i+1) (head x) xs
-             else aux 1 (head x) xs
-  in if head brd == [] then aux 0 Red (tail brd) else aux 1 (head (head brd)) (tail brd)
+--Checks for horizontal wins
 
--- Checks all rows for a win, returning a list of winning colors
-checkHorizontal brd = 
-  if length (filter (\x -> length x > 0) brd) < 4 then []
-  else (checkRow brd) ++ (checkHorizontal (map (\x -> if x == [] then [] else tail x) brd))
+checkFour (Red:_) (Red:_) (Red:_) (Red:_) = [Red]
+checkFour (Yellow:_) (Yellow:_) (Yellow:_) (Yellow:_) = [Yellow]
+checkFour (_:xs) (_:ys) (_:zs) (_:ws) = checkFour xs ys zs ws
+checkFour _ _ _ _ = []
+
+checkHorizontal (xs:ys:zs:ws:rest) = checkFour xs ys zs ws ++ checkHorizontal (ys:zs:ws:rest)
+checkHorizontal _ = []
 
 -- Checks one column for a win, returning a list of winning colors
 checkColumn col =
@@ -85,39 +78,13 @@ checkColumn col =
 -- Checks all columns for a win, returning a list of winning colors
 checkVertical brd = concat (map checkColumn brd)
 
--- Checks if the bottom left 4x4 has a diagonal win this way /, returning a list of winning colors
-checkSquareOne :: Board -> [Color]
-checkSquareOne brd =
-  if length brd < 4 then []
-  else let c1 = head brd
-           c2 = head (tail brd)
-           c3 = head (tail (tail brd))
-           c4 = head (tail (tail (tail brd)))
-       in if c1 == [] || length c2 < 2 || length c3 < 3 || length c4 < 4 then []
-          else let clr = head c1
-               in if head (tail c2) == clr && head (tail (tail c3)) == clr && head (tail (tail (tail c4))) == clr then [clr]
-                  else []
-
--- Same as the above function, but for diagonal this way \
-checkSquareTwo :: Board -> [Color]
-checkSquareTwo brd =
-  if length brd < 4 then []
-  else let c1 = head brd
-           c2 = head (tail brd)
-           c3 = head (tail (tail brd))
-           c4 = head (tail (tail (tail brd)))
-       in if c4 == [] || length c3 < 2 || length c2 < 3 || length c1 < 4 then []
-          else let clr = head c4
-               in if head (tail c3) == clr && head (tail (tail c2)) == clr && head (tail (tail (tail c1))) == clr then [clr]
-                  else []
-
--- Checks board for diagonals in a bottom-up, left to right manner, returning list of winning colors
+-- Checks board for diagonals using checkFour, returning list of winning colors
 checkDiagonal :: Board -> [Color]
-checkDiagonal brd = 
-  if filter (\x -> length x > 0) brd == [] then []
-  else let aux [] = []
-           aux chunk = checkSquareOne chunk ++ (checkSquareTwo chunk) ++ (aux (tail chunk))
-       in (aux brd) ++ (checkDiagonal (map (\x -> if x == [] then [] else tail x) brd))
+checkDiagonal (xs:ys:zs:ws:rest) = 
+    checkFour xs (drop 1 ys) (drop 2 zs) (drop 3 ws)
+    ++ checkFour (drop 3 xs) (drop 2 ys) (drop 1 zs) ws
+    ++ checkDiagonal (ys:zs:ws:rest)
+checkDiagonal _ = []
 -- 
 -- End of Story 2
 -- 
