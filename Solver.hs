@@ -4,7 +4,6 @@ import System.IO
 import System.Console.GetOpt
 import Debug.Trace
 
-
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
@@ -171,14 +170,6 @@ prettyPrint (curr,brd) = "Current players turn: " ++ show curr ++ "\n" ++ showRo
 -- 
 
 -- 
--- Story 7 has already been done, since Connect 4 is already has bounded depth.
--- 
-
--- 
--- Story 8 has already been finished.
--- 
-
--- 
 -- Story 9 
 -- 
 
@@ -333,10 +324,6 @@ getFileName [] = do putStr "Enter the file path:"
 --  
 
 -- 
--- Story 15:      Already created files with test cases to satisfy story 15
---
-
--- 
 -- Story 16
 -- 
 eqLists :: (Eq a) => [a] -> [a] -> Bool
@@ -435,6 +422,7 @@ runTests = do
 -- Red is a positive score and Yellow is a negative score.
 rateGame :: Game -> Rating
 rateGame game@(_,brd) 
+  case checkWinner of =
   | checkWinner game == Just (Won Red)      = 10000000
   | checkWinner game == Just (Won Yellow)   = -10000000
   | otherwise                               = rateVertical board + rateHorizontal board + rateDiags board
@@ -513,26 +501,6 @@ rateDiags _ = 0
 --    Nothing -> False 
 -- 
 -- Story 19
---
-
--- 
--- Story 20
---
-
--- 
--- Story 21
---
-
--- 
--- Story 22
---
-
--- 
--- Story 23
---
-
--- 
--- Story 24
 --
 
 -- 
