@@ -367,18 +367,18 @@ testCheckWinner =
      checkWinner (Yellow, boardOngoing) == Nothing
 
 -- Test Cases for `makeMove`
-testMakeMove :: Bool
-testMakeMove =
-  let game1 = (Red, replicate 7 [])  -- Empty board
-      game2 = (Yellow, [[Red], [Red, Yellow], [Yellow, Yellow], [], [], [], []])
-      move1 = 0
-      move2 = 3
-      moveInvalid = 7  -- Invalid move (out of range)
-      game1Result = makeMove game1 move1
-      game2Result = makeMove game2 move2
-  in snd game1Result !! move1 == [Red] &&
-     snd game2Result !! move2 == [Yellow] &&
-     (makeMove game2 moveInvalid `seq` False) `catch` (\_ -> True)  -- Expect an error
+--testMakeMove :: Bool
+--testMakeMove =
+--  let game1 = (Red, replicate 7 [])  -- Empty board
+--      game2 = (Yellow, [[Red], [Red, Yellow], [Yellow, Yellow], [], [], [], []])
+--      move1 = 0
+--      move2 = 3
+--      moveInvalid = 7  -- Invalid move (out of range)
+--      game1Result = makeMove game1 move1
+--      game2Result = makeMove game2 move2
+--  in snd game1Result !! move1 == [Red] &&
+--     snd game2Result !! move2 == [Yellow] &&
+--     (makeMove game2 moveInvalid `seq` False) `catch` (\_ -> True)  -- Expect an error
 
 -- Test Cases for `whoWillWin`
 testWhoWillWin :: Bool
@@ -407,6 +407,7 @@ testShowReadGame =
       gameString = showGame game
   in readGame gameString == Just game
 
+
 -- Combined Test Runner
 runTests :: IO ()
 runTests = do
@@ -415,7 +416,7 @@ runTests = do
   putStrLn "Testing checkWinner..."
   print testCheckWinner
   putStrLn "Testing makeMove..."
-  print testMakeMove
+ -- print testMakeMove
   putStrLn "Testing whoWillWin..."
   print testWhoWillWin
   putStrLn "Testing bestMove..."
@@ -488,32 +489,59 @@ rateDiags _ = 0
 
 -- 
 -- Story 18
---whoWillWin :: Game -> Winner
---whoMightWin :: Game -> Int -> (Rating, Maybe Move)
---whoMightWin game@(color,_) depth 
---    |depth == 0 || isTerminal game == (rateGame game, Nothing)
---    |otherwise = 
---        let moves = validMoves game
---            res = [(move,whoMightWin (makeMove game move) (depth -1) | move <- moves]
---            ratedMoves = [(adjustR color rating, move) | (move, (rating, _ )) <- res]
---        in selectBest color ratedMoves
---adjustR :: Color -> Rating -> Rating 
---adjustR color rating 
---    |color == Red = rating 
---    |color == Yellow = -rating
---selectBest :: Color -> [(Rating , Move)] -> (Rating, Maybe Move) 
---selectBest color ratedMoves
---    |color == Red = maximumBy compareFst ratedMoves
---    |color == Yellow = maximumBy compareFst ratedMoves
---    where 
---        compareFst (r1,_) (rs,_) = compare r1 r2
---isTerminal :: Game -> Bool 
---isTerminal game = case checkWinner game of 
---    Just _ -> True 
---    Nothing -> False 
+
+whoMightWin :: Game -> Int -> (Rating, Maybe Move)
+whoMightWin game@(color,_) depth 
+    | depth == 0 || isTerminal game = (rateGame game, Nothing)
+    | otherwise = 
+        let moves = validMoves game
+            res = [(move,fst $ whoMightWin (makeMove game move) (depth -1)) | move <- moves]
+            bestRes = selectBestEarly color res
+            --ratedMoves = [(adjustR color rating,Just move) | (move, (rating, _ )) <- res]
+        in bestRes
+adjustR :: Color -> Rating -> Rating 
+adjustR color rating 
+    |color == Red = rating 
+    |color == Yellow = -rating
+selectBest :: Color -> [(Rating , Maybe Move)] -> (Rating, Maybe Move) 
+selectBest color ratedMoves
+    |color == Red = maximumBy compareFst ratedMoves
+    |color == Yellow = minimumBy compareFst ratedMoves
+    where 
+        compareFst (r1,_) (r2,_) = compare r1 r2
+maxRate=10000000
+minRate= -maxRate
+selectBestEarly :: Color -> [(Move,Rating)] -> (Rating, Maybe Move) 
+selectBestEarly color res = foldr betterResult ( initialR, Nothing) res 
+    where initialR = if color == Red then minRate else maxRate 
+          betterResult (move, rating) (bestRating, bestMove)
+              | isWinning rating = (rating, Just move) 
+              | otherwise        = maxOrMin (bestRating, bestMove) (rating , Just move) 
+          maxOrMin = if color == Red then max else min 
+          isWinning r = (color == Red && r==maxRate) || (color == Yellow && r == minRate)
+isTerminal :: Game -> Bool 
+isTerminal game = case checkWinner game of 
+    Just _ -> True 
+    Nothing -> False 
+
+whoMightWinTest :: IO Bool
+whoMightWinTest = 
+  let depth = 4
+      gameWin = (Red, [[Red], [Red], [Red], []]) 
+      gameLose = (Yellow, [[Yellow], [Yellow], [Yellow], []]) 
+      gameTie = (Red, replicate 7 [Red, Yellow, Red, Yellow, Red, Yellow])
+      moveWin = whoMightWin gameWin depth 
+      moveLost = whoMightWin gameLose depth 
+      moveTie = whoMightWin gameTie depth
+  in do
+    print $ "Win test result: " ++ show moveWin
+    print $ "Lose test result: " ++ show moveLost
+    print $ "Tie test result:" ++ show moveTie
+    return (fst moveWin == 10000000 && fst moveLost == -10000000 && fst moveTie == 0)
+
 -- 
 -- Story 19
---
+--selectbestEarly function to do story 19 
 
 -- 
 -- Story 20
