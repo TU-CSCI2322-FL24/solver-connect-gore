@@ -38,7 +38,7 @@ dispatch :: [Flag] -> Game -> IO ()
 dispatch flags game
   | FindWinner `elem` flags   = putBestMove game
   | any isDoMove flags        = putDoMove game (getMove flags)
-  | otherwise                 = putStrLn "Coming soon"
+  | otherwise                 = putGoodMove game 5
   
 -- 
 -- Story 2
@@ -522,7 +522,12 @@ rateDiags _ = 0
 -- 
 -- Story 21
 --
-
+putGoodMove :: Game -> IO ()
+putGoodMove game n =
+  let (_,goodMove) = whoMightWin game n
+  in case goodMove of
+     Nothing -> putStrLn "Game is already over"
+     Just x -> putStrLn ("A good move is " ++ (show (x + 1)))
 -- 
 -- Story 22
 --
