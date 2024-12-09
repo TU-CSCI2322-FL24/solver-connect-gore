@@ -528,7 +528,7 @@ whoMightWin game@(color,_) depth
     | depth == 0 || isTerminal game = (rateGame game, Nothing)
     | otherwise = 
         let moves = validMoves game
-            res = [(move,whoMightWin (makeMove game move) (depth -1)) | move <- moves]
+            res = [(move,fst $ whoMightWin (makeMove game move) (depth -1)) | move <- moves]
             bestRes = selectBestEarly color res
             --ratedMoves = [(adjustR color rating,Just move) | (move, (rating, _ )) <- res]
         in bestRes
@@ -542,15 +542,16 @@ selectBest color ratedMoves
     |color == Yellow = minimumBy compareFst ratedMoves
     where 
         compareFst (r1,_) (r2,_) = compare r1 r2
-
-selectBestEarly :: Color -> [(Move,(Rating, Maybe Move))] -> (Rating, Maybe Move) 
+maxRate=10000000
+minRate= -maxRate
+selectBestEarly :: Color -> [(Move,Rating)] -> (Rating, Maybe Move) 
 selectBestEarly color res = foldr betterResult ( initialR, Nothing) res 
-    where initialR = if color == Red then minBound else maxBound 
-          betterResult (move, (rating, _ )) (bestRating, bestMove)
+    where initialR = if color == Red then minRate else maxRate 
+          betterResult (move, rating) (bestRating, bestMove)
               | isWinning rating = (rating, Just move) 
               | otherwise        = maxOrMin (bestRating, bestMove) (rating , Just move) 
           maxOrMin = if color == Red then max else min 
-          isWinning r = (color == Red && r==maxBound) || (color == Yellow && r == minBound)
+          isWinning r = (color == Red && r==maxRate) || (color == Yellow && r == minRate)
 isTerminal :: Game -> Bool 
 isTerminal game = case checkWinner game of 
     Just _ -> True 
