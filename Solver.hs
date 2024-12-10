@@ -11,35 +11,39 @@ type Move = Int
 data Winner = Won Color | Tie deriving (Show, Eq)
 type Rating = Int
 
+defaultDepth :: Int
+defaultDepth = 5
+
 -- Main, Flags
 
-data Flag = Help | FindWinner | Depth Int | DoMove String | Verbose deriving (Show, Eq)
+data Flag = Help | FindWinner | Depth String | DoMove String | Verbose deriving (Show, Eq)
 
 options :: [OptDescr Flag]
 options = [ Option ['h'] ["help"] (NoArg Help) "Print usage information and exit.",
             Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move.",
             Option ['m'] ["move"] (ReqArg DoMove "<move>") "Do move <move> on the board.",
-						Option ['v'] ["verbose"] (NoArg Verbose) "Outputs a move and a description of how good it is."
-            Option ['d'] ["depth"] (ReqArg (Depth . read) "<num>") "Specify cutoff depth <num>"            
+            Option ['v'] ["verbose"] (NoArg Verbose) "Outputs a move and a description of how good it is.",
+            Option ['d'] ["depth"] (ReqArg Depth "<num>") "Specify cutoff depth <num>."
           ]
 
 main :: IO ()
 main = 
-    do args <- getArgs  
-       let (flags, inputs, errors) = getOpt Permute options args
-       if Help `elem` flags
-       then putStrLn $ usageInfo "Solver [options] [filename]\nConnect Four Solver." options
-       else
-         do filepath <- getFileName inputs
-            loadResult <- loadGame filepath
-            case loadResult of 
-              Just game -> dispatch flags game
-              Nothing -> putStrLn "Failed to load game"
+  do args <- getArgs  
+     let (flags, inputs, errors) = getOpt Permute options args
+     if Help `elem` flags
+     then putStrLn $ usageInfo "Solver [options] [filename]\nConnect Four Solver." options
+     else 
+       do filepath <- getFileName inputs
+          loadResult <- loadGame filepath
+          case loadResult of
+            Just game -> dispatch flags game
+            Nothing -> putStrLn "Failed to load game"
 
 dispatch :: [Flag] -> Game -> IO ()
 dispatch flags game
   | FindWinner `elem` flags   = putBestMove game
-  | any isDoMove flags        = putDoMove game (getMove flags)  
+  | any isDoMove flags        = putDoMove game flags
+  | Verbose `elem` flags      = putMoveDescr game
   | otherwise                 = putGoodMove game (getDepth flags)
 
   
@@ -555,8 +559,8 @@ isDepthFlag (Depth _) = True
 isDepthFlag _ = False
 
 getDepth :: [Flag] -> Int
-getDepth [] = 5 -- Default Depth if none specified
-getDepth ((Depth d):_) =  d
+getDepth [] = defaultDepth
+getDepth ((Depth d):_) =  read d
 getDepth (_:flags) = getDepth flags
 -- End of Story 23
 
@@ -581,6 +585,11 @@ putDoMove game flags =
              putStrLn (prettyPrint (makeMove game move))
      else do putStrLn "New board:"
              putStrLn (showGame (makeMove game move))
+
+putMoveDescr :: Game -> IO()
+putMoveDescr game =
+  do let (descr, move) = whoMightWin game defaultDepth
+     putStrLn ("A good move is " ++ (show move) ++ " yielding rating " ++ (show descr) ++ ".")
 -- 
 -- End of Story 25
 --  
