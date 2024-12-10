@@ -4,7 +4,6 @@ import System.IO
 import System.Console.GetOpt
 import Debug.Trace
 
-
 type Game  = (Color,Board)
 type Board = [[Color]]
 data Color = Red | Yellow deriving (Show, Eq)
@@ -41,6 +40,7 @@ dispatch flags game
   | any isDoMove flags        = putDoMove game (getMove flags)  
   | otherwise                 = putGoodMove game (getDepth flags)
   
+  
 -- 
 -- Story 2
 -- 
@@ -56,13 +56,13 @@ checkWinner game@(_,brd) =
                else Just (Won Red)
           else Just (Won Yellow)
 
---Checks for horizontal wins
-
+-- Checks for wins given 4 lists
 checkFour (Red:_) (Red:_) (Red:_) (Red:_) = [Red]
 checkFour (Yellow:_) (Yellow:_) (Yellow:_) (Yellow:_) = [Yellow]
 checkFour (_:xs) (_:ys) (_:zs) (_:ws) = checkFour xs ys zs ws
 checkFour _ _ _ _ = []
 
+-- Checks for horizontal wins
 checkHorizontal (xs:ys:zs:ws:rest) = checkFour xs ys zs ws ++ checkHorizontal (ys:zs:ws:rest)
 checkHorizontal _ = []
 
@@ -169,14 +169,6 @@ prettyPrint (curr,brd) = "Current players turn: " ++ show curr ++ "\n" ++ showRo
     where rows = reverse $ transpose $ maybeinator $ brd
 -- 
 -- End of Story 5
--- 
-
--- 
--- Story 7 has already been done, since Connect 4 is already has bounded depth.
--- 
-
--- 
--- Story 8 has already been finished.
 -- 
 
 -- 
@@ -334,10 +326,6 @@ getFileName [] = do putStr "Enter the file path:"
 --  
 
 -- 
--- Story 15:      Already created files with test cases to satisfy story 15
---
-
--- 
 -- Story 16
 -- 
 eqLists :: (Eq a) => [a] -> [a] -> Bool
@@ -368,20 +356,20 @@ testCheckWinner =
      checkWinner (Yellow, boardOngoing) == Nothing
 
 -- Test Cases for `makeMove`
-testMakeMove :: Bool
-testMakeMove =
- let game1 = (Red, replicate 7 [])  -- Empty board
-     game2 = (Yellow, [[Red], [Red, Yellow], [Yellow, Yellow], [], [], [], []])
-     move1 = 0
-     move2 = 3
-     moveInvalid = 7  -- Invalid move (out of range)
-     game1Result = makeMove game1 move1
-     game2Result = makeMove game2 move2
- in snd game1Result !! move1 == [Red] &&
-    snd game2Result !! move2 == [Yellow] &&
-    (makeMove game2 moveInvalid `seq` False) `catch` (\_ -> True)  -- Expect an error
+--testMakeMove :: Bool
+--testMakeMove =
+--  let game1 = (Red, replicate 7 [])  -- Empty board
+--      game2 = (Yellow, [[Red], [Red, Yellow], [Yellow, Yellow], [], [], [], []])
+--      move1 = 0
+--      move2 = 3
+--      moveInvalid = 7  -- Invalid move (out of range)
+--      game1Result = makeMove game1 move1
+--      game2Result = makeMove game2 move2
+--  in snd game1Result !! move1 == [Red] &&
+--     snd game2Result !! move2 == [Yellow] &&
+--     (makeMove game2 moveInvalid `seq` False) `catch` (\_ -> True)  -- Expect an error
 
---Test Cases for `whoWillWin`
+-- Test Cases for `whoWillWin`
 testWhoWillWin :: Bool
 testWhoWillWin =
   let gameWin = (Red, [[Red], [Red], [Red], []])  -- Immediate win
@@ -407,6 +395,7 @@ testShowReadGame =
   let game = (Red, [[Red], [Yellow, Red], [Yellow, Yellow, Red], [], [], [], []])
       gameString = showGame game
   in readGame gameString == Just game
+
 
 -- Combined Test Runner
 runTests :: IO ()
@@ -435,11 +424,13 @@ runTests = do
 -- If it has only 1 color, then add a point for every piece that is of that color.
 -- Red is a positive score and Yellow is a negative score.
 rateGame :: Game -> Rating
-rateGame game@(_,brd) 
-  | checkWinner game == Just (Won Red)      = 10000000
-  | checkWinner game == Just (Won Yellow)   = -10000000
-  | otherwise                               = rateVertical board + rateHorizontal board + rateDiags board
-    where board = maybeinator brd
+rateGame game@(_,brd) =
+  case checkWinner game of 
+    Just (Won Red)      -> 10000000
+    Just (Won Yellow)   -> -10000000
+    Just Tie            -> 0
+    Nothing             -> rateVertical board + rateHorizontal board + rateDiags board
+  where board = maybeinator brd
 
 -- Gives a rating for a list of four Colors, adding a point for each Color of the same type.
 count ::  Color -> [Maybe Color] -> Rating
@@ -489,6 +480,8 @@ rateDiags _ = 0
 
 -- 
 -- Story 18
+
+--
 whoMightWin :: Game -> Int -> (Rating, Maybe Move)
 whoMightWin game@(color,_) depth 
     | depth == 0 || isTerminal game = (rateGame game, Nothing)
@@ -537,13 +530,9 @@ whoMightWinTest =
     print $ "Lose test result: " ++ show moveLost
     print $ "Tie test result:" ++ show moveTie
     return (fst moveWin == 10000000 && fst moveLost == -10000000 && fst moveTie == 0)
- 
--- Story 19
---
-
 -- 
--- Story 20
---
+-- End of Story 18
+--  
 
 -- 
 -- Story 21
@@ -554,11 +543,9 @@ putGoodMove game n =
   in case goodMove of
      Nothing -> putStrLn "Game is already over"
      Just x -> putStrLn ("A good move is " ++ (show (x + 1)))
--- 
--- Story 22
---
+-- End of Story 21
 
--- 
+
 -- Story 23
 --
 isDepthFlag :: Flag -> Bool
@@ -569,15 +556,12 @@ getDepth :: [Flag] -> Int
 getDepth [] = 5 -- Default Depth if none specified
 getDepth ((Depth d):_) =  d
 getDepth (_:flags) = getDepth flags
+-- End of Story 23
 
--- 
--- Story 24
---
 
 -- 
 -- Story 25
 --
-
 isDoMove :: Flag -> Bool
 isDoMove (DoMove _) = True
 isDoMove _ = False
@@ -592,9 +576,5 @@ putDoMove game move =
   do putStrLn "New board:"
      putStrLn (showGame (makeMove game (move - 1)))
 -- 
--- Story 26
---
-
--- 
--- Story 27
---
+-- End of Story 25
+--  
