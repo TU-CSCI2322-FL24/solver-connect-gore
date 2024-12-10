@@ -24,7 +24,7 @@ options = [ Option ['h'] ["help"] (NoArg Help) "Print usage information and exit
 
 main :: IO ()
 main = 
-    do args <- getArgs
+    do args <- getArgs  
        let (flags, inputs, errors) = getOpt Permute options args
        if Help `elem` flags
        then putStrLn $ usageInfo "Solver [options] [filename]\nConnect Four Solver." options
@@ -548,7 +548,7 @@ whoMightWinTest =
 -- 
 -- Story 21
 --
-putGoodMove :: Game -> IO ()
+putGoodMove :: Game -> Int -> IO ()
 putGoodMove game n =
   let (_,goodMove) = whoMightWin game n
   in case goodMove of
