@@ -3,6 +3,7 @@ import System.Environment
 import System.IO
 import System.Console.GetOpt
 import Debug.Trace
+import Data.Maybe
 
 type Game  = (Color,Board)
 type Board = [[Color]]
@@ -16,28 +17,34 @@ defaultDepth = 5
 
 -- Main, Flags
 
-data Flag = Help | FindWinner | Depth String | DoMove String | Verbose deriving (Show, Eq)
+data Flag = Help | FindWinner | Depth String | DoMove String | Verbose | Interactive deriving (Show, Eq)
 
 options :: [OptDescr Flag]
 options = [ Option ['h'] ["help"] (NoArg Help) "Print usage information and exit.",
             Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move.",
             Option ['m'] ["move"] (ReqArg DoMove "<move>") "Do move <move> on the board.",
             Option ['v'] ["verbose"] (NoArg Verbose) "Outputs a move and a description of how good it is.",
-            Option ['d'] ["depth"] (ReqArg Depth "<num>") "Specify cutoff depth <num>."
+            Option ['d'] ["depth"] (ReqArg Depth "<num>") "Specify cutoff depth <num>.",
+            Option ['i'] ["interactive"] (NoArg Interactive) "Simulates gameplay against the computer."
           ]
 
 main :: IO ()
 main = 
   do args <- getArgs  
      let (flags, inputs, errors) = getOpt Permute options args
-     if Help `elem` flags
+     if Help `elem` flags 
      then putStrLn $ usageInfo "Solver [options] [filename]\nConnect Four Solver." options
-     else 
-       do filepath <- getFileName inputs
-          loadResult <- loadGame filepath
-          case loadResult of
-            Just game -> dispatch flags game
-            Nothing -> putStrLn "Failed to load game"
+     else if Interactive `elem` flags 
+          then do
+             start <- startGame inputs
+             gamePlay start
+          else do
+             filepath <- getFileName inputs
+             loadResult <- loadGame filepath
+             case loadResult of
+               Just game -> dispatch flags game
+               Nothing -> putStrLn "Failed to load game"
+     return ()
 
 dispatch :: [Flag] -> Game -> IO ()
 dispatch flags game
@@ -572,19 +579,27 @@ isDoMove :: Flag -> Bool
 isDoMove (DoMove _) = True
 isDoMove _ = False
 
-getMove :: [Flag] -> Int
-getMove [] = 0
-getMove ((DoMove x):_) = read x
+getMove :: [Flag] -> String
+getMove [] = "1"
+getMove ((DoMove x):_) = x
 getMove (_:flags) = getMove flags
+
+makeStrMove :: Game -> String -> Maybe Game
+makeStrMove game str =
+  let move = read str - 1
+  in if move `elem` (validMoves game)
+     then Just (makeMove game move)
+     else Nothing
 
 putDoMove :: Game -> [Flag] -> IO ()
 putDoMove game flags = 
-  let move = getMove flags - 1
-  in if Verbose `elem` flags
-     then do putStrLn "New board:"
-             putStrLn (prettyPrint (makeMove game move))
-     else do putStrLn "New board:"
-             putStrLn (showGame (makeMove game move))
+  let move = getMove flags
+  in case (makeStrMove game move, Verbose `elem` flags) of
+       (Nothing,_)      -> do putStrLn "Invalid move."
+       (Just x, True)   -> do putStrLn "New board:"
+                              putStrLn $ prettyPrint x
+       (Just x, _)      -> do putStrLn "New board:"
+                              putStrLn $ showGame x
 
 putMoveDescr :: Game -> IO()
 putMoveDescr game =
@@ -592,4 +607,51 @@ putMoveDescr game =
      putStrLn ("A good move is " ++ (show move) ++ " yielding rating " ++ (show descr) ++ ".")
 -- 
 -- End of Story 25
---  
+--
+
+--Story 26
+--
+defaultGame = (Red, [[],[],[],[],[],[],[]])
+
+startGame :: [String] -> IO (Game)
+startGame [] = do return defaultGame
+startGame xs = do
+  fileName <- getFileName xs
+  game <- loadGame fileName
+  case game of
+       Nothing -> return (defaultGame)
+       Just x -> return x
+
+gamePlay :: Game -> IO ()
+gamePlay game = 
+  do putStr "Enter a move: "
+     hFlush stdout
+     moveStr <- getLine
+     let nextGame = makeStrMove game moveStr
+     case nextGame of
+       Nothing -> do putStrLn "Invalid move, try again."
+                     gamePlay game
+       Just x  -> do putStrLn ("Board after placing a piece at " ++ moveStr)
+                     putStrLn (prettyPrint x)
+                     computerPlay x 
+			 
+			 
+computerPlay :: Game -> IO ()
+computerPlay game = do
+  let winner = checkWinner game
+  case winner of
+    Just x  -> do putStrLn ("Game over. " ++ show x)
+    Nothing -> do
+      (nextGame, computerMove) <- makeGoodMove game
+      let nextWinner = checkWinner nextGame
+      case nextWinner of
+        Just y  -> putStrLn ("Game over. " ++ show y)
+        Nothing -> do putStrLn ("Computer places a piece at " ++ (show computerMove)) 
+                      putStrLn (prettyPrint nextGame)
+                      gamePlay nextGame
+
+makeGoodMove :: Game -> IO (Game,Move)
+makeGoodMove game = do
+  let (_,move) = whoMightWin game defaultDepth
+  return (makeMove game (fromJust move), fromJust move + 1)
+  
