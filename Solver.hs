@@ -12,17 +12,18 @@ data Winner = Won Color | Tie deriving (Show, Eq)
 type Rating = Int
 
 -- Main, Flags
-data Flag = Help | FindWinner | DoMove String deriving (Show, Eq)
+data Flag = Help | FindWinner | Depth Int | DoMove String deriving (Show, Eq)
 
 options :: [OptDescr Flag]
 options = [ Option ['h'] ["help"] (NoArg Help) "Print usage information and exit.",
             Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move.",
-            Option ['m'] ["move"] (ReqArg DoMove "<move>") "Do move <move> on the board."
+            Option ['m'] ["move"] (ReqArg DoMove "<move>") "Do move <move> on the board.",
+            Option ['d'] ["depth"] (ReqArg (Depth . read) "<num>") "Specify cutoff depth <num>"            
           ]
 
 main :: IO ()
 main = 
-    do args <- getArgs
+    do args <- getArgs  
        let (flags, inputs, errors) = getOpt Permute options args
        if Help `elem` flags
        then putStrLn $ usageInfo "Solver [options] [filename]\nConnect Four Solver." options
@@ -36,8 +37,8 @@ main =
 dispatch :: [Flag] -> Game -> IO ()
 dispatch flags game
   | FindWinner `elem` flags   = putBestMove game
-  | any isDoMove flags        = putDoMove game (getMove flags)
-  | otherwise                 = putGoodMove game 5
+  | any isDoMove flags        = putDoMove game (getMove flags)  
+  | otherwise                 = putGoodMove game (getDepth flags)
   
   
 -- 
@@ -330,7 +331,7 @@ getFileName [] = do putStr "Enter the file path:"
 eqLists :: (Eq a) => [a] -> [a] -> Bool
 eqLists xs ys = null (xs \\ ys) && null (ys \\ xs)
 
--- Test Cases for `validMoves`
+--Test Cases for `validMoves`
 testValidMoves :: Bool
 testValidMoves =
   let board1 = replicate 7 []  -- Empty board
@@ -479,6 +480,7 @@ rateDiags _ = 0
 
 -- 
 -- Story 18
+
 --
 whoMightWin :: Game -> Int -> (Rating, Maybe Move)
 whoMightWin game@(color,_) depth 
@@ -535,15 +537,27 @@ whoMightWinTest =
 -- 
 -- Story 21
 --
-putGoodMove :: Game -> IO ()
+putGoodMove :: Game -> Int -> IO ()
 putGoodMove game n =
   let (_,goodMove) = whoMightWin game n
   in case goodMove of
      Nothing -> putStrLn "Game is already over"
      Just x -> putStrLn ("A good move is " ++ (show (x + 1)))
--- 
 -- End of Story 21
---  
+
+
+-- Story 23
+--
+isDepthFlag :: Flag -> Bool
+isDepthFlag (Depth _) = True
+isDepthFlag _ = False
+
+getDepth :: [Flag] -> Int
+getDepth [] = 5 -- Default Depth if none specified
+getDepth ((Depth d):_) =  d
+getDepth (_:flags) = getDepth flags
+-- End of Story 23
+
 
 -- 
 -- Story 25
