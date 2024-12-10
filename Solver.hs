@@ -12,12 +12,14 @@ data Winner = Won Color | Tie deriving (Show, Eq)
 type Rating = Int
 
 -- Main, Flags
-data Flag = Help | FindWinner | Depth Int | DoMove String deriving (Show, Eq)
+
+data Flag = Help | FindWinner | Depth Int | DoMove String | Verbose deriving (Show, Eq)
 
 options :: [OptDescr Flag]
 options = [ Option ['h'] ["help"] (NoArg Help) "Print usage information and exit.",
             Option ['w'] ["winner"] (NoArg FindWinner) "Finds the definitive best move.",
             Option ['m'] ["move"] (ReqArg DoMove "<move>") "Do move <move> on the board.",
+						Option ['v'] ["verbose"] (NoArg Verbose) "Outputs a move and a description of how good it is."
             Option ['d'] ["depth"] (ReqArg (Depth . read) "<num>") "Specify cutoff depth <num>"            
           ]
 
@@ -39,7 +41,7 @@ dispatch flags game
   | FindWinner `elem` flags   = putBestMove game
   | any isDoMove flags        = putDoMove game (getMove flags)  
   | otherwise                 = putGoodMove game (getDepth flags)
-  
+
   
 -- 
 -- Story 2
@@ -571,10 +573,14 @@ getMove [] = 0
 getMove ((DoMove x):_) = read x
 getMove (_:flags) = getMove flags
 
-putDoMove :: Game -> Move -> IO ()
-putDoMove game move = 
-  do putStrLn "New board:"
-     putStrLn (showGame (makeMove game (move - 1)))
+putDoMove :: Game -> [Flag] -> IO ()
+putDoMove game flags = 
+  let move = getMove flags - 1
+  in if Verbose `elem` flags
+     then do putStrLn "New board:"
+             putStrLn (prettyPrint (makeMove game move))
+     else do putStrLn "New board:"
+             putStrLn (showGame (makeMove game move))
 -- 
 -- End of Story 25
 --  
