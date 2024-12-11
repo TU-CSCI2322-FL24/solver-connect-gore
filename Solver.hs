@@ -369,20 +369,31 @@ testCheckWinner =
      checkWinner (Yellow, boardOngoing) == Nothing
 
 -- Test Cases for `makeMove`
---testMakeMove :: Bool
---testMakeMove =
---  let game1 = (Red, replicate 7 [])  -- Empty board
+-- import Control.Exception (try, SomeException)
+
+-- testMakeMove :: IO Bool
+-- testMakeMove = do
+--    let game1 = (Red, replicate 7 [])  -- Empty board
 --      game2 = (Yellow, [[Red], [Red, Yellow], [Yellow, Yellow], [], [], [], []])
 --      move1 = 0
 --      move2 = 3
 --      moveInvalid = 7  -- Invalid move (out of range)
---      game1Result = makeMove game1 move1
---      game2Result = makeMove game2 move2
---  in snd game1Result !! move1 == [Red] &&
---     snd game2Result !! move2 == [Yellow] &&
---     (makeMove game2 moveInvalid `seq` False) `catch` (\_ -> True)  -- Expect an error
 
--- Test Cases for `whoWillWin`
+  -- Valid moves
+--  let game1Result = makeMove game1 move1
+--      game2Result = makeMove game2 move2
+--      validTest = snd game1Result !! move1 == [Red] &&
+--                  snd game2Result !! move2 == [Yellow]
+
+  -- Invalid move (catch exception)
+--  invalidTest <- do
+--    result <- try (evaluate (makeMove game2 moveInvalid)) :: IO (Either SomeException Game)
+--    return (case result of
+--              Left _  -> True   -- Exception was raised
+--              Right _ -> False) -- No exception (unexpected)
+
+--  return (validTest && invalidTest)
+
 testWhoWillWin :: Bool
 testWhoWillWin =
   let gameWin = (Red, [[Red], [Red], [Red], []])  -- Immediate win
