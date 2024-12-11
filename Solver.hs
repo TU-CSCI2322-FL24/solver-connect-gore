@@ -35,9 +35,7 @@ main =
      if Help `elem` flags 
      then putStrLn $ usageInfo "Solver [options] [filename]\nConnect Four Solver." options
      else if Interactive `elem` flags 
-          then do
-             start <- startGame inputs
-             gamePlay start
+          then do playGame inputs
           else do
              filepath <- getFileName inputs
              loadResult <- loadGame filepath
@@ -624,31 +622,39 @@ putMoveDescr game =
 --
 defaultGame = (Red, [[],[],[],[],[],[],[]])
 
-startGame :: [String] -> IO (Game)
-startGame [] = do return defaultGame
-startGame xs = do
+playGame :: [String] -> IO ()
+playGame inputs = do
+  startGame <- getStartGame inputs
+  putStrLn "Starting board:"
+  putStrLn $ prettyPrint startGame
+  gameTurn startGame
+
+
+getStartGame :: [String] -> IO (Game)
+getStartGame [] = do return defaultGame
+getStartGame xs = do
   fileName <- getFileName xs
   game <- loadGame fileName
   case game of
        Nothing -> return (defaultGame)
        Just x -> return x
 
-gamePlay :: Game -> IO ()
-gamePlay game = 
+gameTurn :: Game -> IO ()
+gameTurn game = 
   do putStr "Enter a move: "
      hFlush stdout
      moveStr <- getLine
      let nextGame = makeStrMove game moveStr
      case nextGame of
        Nothing -> do putStrLn "Invalid move, try again."
-                     gamePlay game
+                     gameTurn game
        Just x  -> do putStrLn ("Board after placing a piece at " ++ moveStr)
                      putStrLn (prettyPrint x)
-                     computerPlay x 
+                     computerTurn x 
 			 
 			 
-computerPlay :: Game -> IO ()
-computerPlay game = do
+computerTurn :: Game -> IO ()
+computerTurn game = do
   let winner = checkWinner game
   case winner of
     Just x  -> do putStrLn ("Game over. " ++ show x)
@@ -656,10 +662,11 @@ computerPlay game = do
       (nextGame, computerMove) <- makeGoodMove game
       let nextWinner = checkWinner nextGame
       case nextWinner of
-        Just y  -> putStrLn ("Game over. " ++ show y)
+        Just y  -> do putStrLn (prettyPrint nextGame)
+                      putStrLn ("Game over. " ++ show y)
         Nothing -> do putStrLn ("Computer places a piece at " ++ (show computerMove)) 
                       putStrLn (prettyPrint nextGame)
-                      gamePlay nextGame
+                      gameTurn nextGame
 
 makeGoodMove :: Game -> IO (Game,Move)
 makeGoodMove game = do
