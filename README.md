@@ -1,32 +1,14 @@
 # solver-connect-gore
-Project 5
+Project 5: Connect Four Solver
 * Team Name: Connect Gore
 * Team Members: Rudra Vashi, Aidan McLoughlin, Kevin Han, Owen Flynn, Erin Heath
 
+Run Solver.hs or the executable solve to play. Add a game file as a command line argument or when prompted, and if no flags are provided the solver will output a good move given the current game state.
 
-```Haskell
---implementation option 1
-
-data Color = Red | Yellow
-          -- 2 different data types (red or yellow)
-          
-Move :: Int
-          -- int = column number
-          -- add new move to an end of a list
-          
-Winner :: OneWinner Color | Tie | None
-          -- 3 different types: winning player, tie, no winner
-
-Board :: [[Maybe Color]]
-
-Game  :: (Color,Board)
-          -- list of lists (list of columns)
-
--- implementation option 2
-
-Game :: [Column]
-
-Move :: (Color, Int)
--- the color of the piece being played and the number of the column it's being played in
-
-```
+The following flags are supported:
+-h        --help           Prints help message and quits
+-w        --winner         Prints the definitive best move and outcome
+-d <num>  --depth <num>    Prints a good move by analyzing all games after <num> turns
+-m <move> --move <move>    Prints the board after making a move
+-v        --verbose        Prints a good move and a description of how good the move is
+-i        --interactive    Starts a new game against the computer or plays against the computer from the game state of a file-name argument
